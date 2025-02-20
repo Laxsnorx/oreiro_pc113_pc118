@@ -32,7 +32,6 @@ class EmployeeController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:employees',
             'position' => 'required|string',
-            'salary' => 'required|numeric',
         ]));
 
         return response()->json($employee, 201);
@@ -43,7 +42,7 @@ class EmployeeController extends Controller
      */
     public function show(Employee $employee)
     {
-        return response()->json($$employee,200);
+        return response()->json($employee,200);
     }
 
     /**
@@ -63,7 +62,6 @@ class EmployeeController extends Controller
             'name' => 'sometimes|required|string|max:255',
             'email' => 'sometimes|required|email|unique:employees,email,' . $employee->id,
             'position' => 'sometimes|required|string',
-            'salary' => 'sometimes|required|numeric',
         ]));
 
         return response()->json($employee, 200);
@@ -78,5 +76,3 @@ class EmployeeController extends Controller
         return response()->json(['message' => 'Employee deleted'], 200);
     }
 }
-
-
