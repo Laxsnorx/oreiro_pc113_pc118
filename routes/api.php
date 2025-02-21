@@ -1,8 +1,10 @@
 <?php
-use App\Http\Controllers\EmployeeController;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\StudentsController;
+
 
 Route::get('/user', function (Request $request) {
     return $request->user();

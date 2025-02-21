@@ -10,9 +10,18 @@ class StudentsController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        return response()->json(Student::all(),200);
+        $query = Student::query();
+
+        
+        if ($request->has('search')) {
+            $search = $request->search;
+            $query->where('name', 'LIKE', "%$search%")
+                ->orWhere('email', 'LIKE', "%$search%");
+        }
+
+        return response()->json($query->get(), 200);
     }
 
     /**
