@@ -12,3 +12,7 @@ Route::get('/user', function (Request $request) {
 
 Route::get('/employees', [EmployeeController::class,'index']);
 Route::get('/students', [StudentsController::class,'index']);
+Route::post('/employees', [EmployeeController::class,'store']);
+Route::put('/employees/{id}', [EmployeeController::class, 'update']);
+Route::get('/employees/{id}/', [EmployeeController::class,'show']);
+Route::delete('/employees/{id}', [EmployeeController::class, 'destroy']);
