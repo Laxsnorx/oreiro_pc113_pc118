@@ -11,8 +11,15 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 Route::get('/employees', [EmployeeController::class,'index']);
-Route::get('/students', [StudentsController::class,'index']);
 Route::post('/employees', [EmployeeController::class,'store']);
 Route::put('/employees/{id}', [EmployeeController::class, 'update']);
 Route::get('/employees/{id}/', [EmployeeController::class,'show']);
 Route::delete('/employees/{id}', [EmployeeController::class, 'destroy']);
+
+
+//estudyanteeeee
+Route::get('/students', [StudentsController::class,'index']);
+Route::post('/students', [StudentsController::class,'store']);
+Route::put('/students/{id}', [StudentsController::class, 'update']);
+Route::get('/students/{id}/', [StudentsController::class,'show']);
+Route::delete('/students/{id}', [StudentsController::class, 'destroy']);
