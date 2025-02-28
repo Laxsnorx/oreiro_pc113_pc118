@@ -24,3 +24,6 @@ $app->router->group([
 ], function ($router) {
     require base_path('routes/api.php');
 });
+$app->middleware([
+    \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
+]);
