@@ -1,10 +1,12 @@
 <?php
 
+use App\Http\Controllers\UserDashboardController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\StudentsController;
-use App\Http\Controllers\AuthController;
+use App\Http\Controllers\UserController;
 use Illuminate\Http\Request; 
 use Illuminate\Support\Facades\Route;
+
 
 Route::get('/', function () {
     return view('welcome');
@@ -18,7 +20,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     ]);
 });
 
-Route::post('/login', [AuthController::class, 'login']); 
+
+Route::post('/login', [UserController::class, 'login']);
 
 
 // Employees
@@ -35,4 +38,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/students/{id}', [StudentsController::class, 'update']);
     Route::get('/students/{id}', [StudentsController::class,'show']);
     Route::delete('/students/{id}', [StudentsController::class, 'destroy']);
+});
+
+//!Admin Routes
+Route::middleware(['auth:sanctum','role:admin'])->group(function(){
+    Route::get('/user', [UserController::class, 'index']);
+});
+
+//!User Routes
+Route::middleware(['auth:sanctum','role:user'])->group(function(){
+    Route::get('/userdashboard', [UserDashboardController::class, 'index']);
 });
