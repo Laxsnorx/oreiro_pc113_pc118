@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Employee;
 use Illuminate\Http\Request;
+use Exception;
 
 class EmployeeController extends Controller
 {
@@ -23,6 +24,7 @@ class EmployeeController extends Controller
     
     return response()->json($query->get(), 200);
 }
+
 
     /**
      * Show the form for creating a new resource.

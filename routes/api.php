@@ -3,7 +3,7 @@
 use App\Http\Controllers\UserDashboardController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\StudentsController;
-use App\Http\Controllers\UserController;
+use App\Http\Controllers\UserController; //!new
 use Illuminate\Http\Request; 
 use Illuminate\Support\Facades\Route;
 
@@ -21,7 +21,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 
-Route::post('/login', [UserController::class, 'login']);
+Route::post('/login', [UserController::class, 'login']); //!new
 
 
 // Employees
