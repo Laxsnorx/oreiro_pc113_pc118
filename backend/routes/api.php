@@ -49,3 +49,9 @@ Route::middleware(['auth:sanctum','role:admin'])->group(function(){
 Route::middleware(['auth:sanctum','role:user'])->group(function(){
     Route::get('/userdashboard', [UserDashboardController::class, 'index']);
 });
+
+//! Consuming API
+Route::middleware('auth:sanctum')->post('/logout', function (Request $request) {
+    $request->user()->tokens()->delete(); // Revoke all tokens
+    return response()->json(['message' => 'Logged out successfully']);
+});

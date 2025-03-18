@@ -10,10 +10,10 @@ use Exception;
 //! new 
 class UserController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-                try {
-            return response()->json(User::all(), 200);
+    try {
+        return response()->json(User::all(), 200);
         } catch (Exception $e) {
             return response()->json([
                 'message' => 'Error fetching users',
@@ -45,6 +45,5 @@ class UserController extends Controller
                 'error' => $e->getMessage(),
             ], 500);
         }
-
     }
 }
