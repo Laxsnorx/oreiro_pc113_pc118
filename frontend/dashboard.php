@@ -11,7 +11,7 @@
 </head>
 <body class="bg-[#f8f4f3] font-sans text-gray-900 antialiased">
     <div class="flex flex-col md:flex-row min-h-screen">
-        <!-- Sidebar -->
+        //!Sidebar
         <div class="w-full md:w-64 bg-white shadow-lg p-6 flex flex-col justify-between">
             <div>
                 <h2 class="font-bold text-3xl">USER<span class="bg-[#f84525] text-white px-2 rounded-md">LOGIN</span></h2>
@@ -32,7 +32,7 @@
                 </button>
             </div>
         </div>
-        <!-- Main Content Area -->
+        //!Main Content Area
         <div class="flex-1 p-6 md:p-10">
             <div id="mainContent" class="bg-white shadow-md p-6 rounded-lg">
                 <p class="text-lg text-gray-700">Click "User's Lists" to view users.</p>

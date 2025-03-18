@@ -9,8 +9,6 @@
 
 
         <script src="https://cdn.tailwindcss.com"></script>
-        
-        <!-- Link External CSS -->
         <link rel="stylesheet" href="http://127.0.0.1/oreiro-reden/frontend/styles/login.css">
     </head>
     <body>
