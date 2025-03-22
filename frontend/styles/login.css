@@ -1,0 +1,95 @@
+body {
+  background-color: #f8f9fa;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #2c3e50;
+  margin: 0;
+  padding: 0;
+}
+
+h2 {
+  color: #2c3e50;
+}
+
+h2 span {
+  background-color: #ff6f00;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+}
+
+.card {
+  border: none;
+  border-radius: 12px;
+  background-color: #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.card-body {
+  padding: 2rem;
+}
+
+input.form-control {
+  border: 1px solid #ffd8a8;
+  border-radius: 8px;
+  padding: 0.6rem;
+  font-size: 0.95rem;
+  background-color: #fff;
+}
+
+input.form-control:focus {
+  border-color: #ff6f00;
+  box-shadow: 0 0 0 0.2rem rgba(255, 111, 0, 0.25);
+}
+
+label.form-label {
+  font-weight: 500;
+  color: #2c3e50;
+}
+
+.btn-danger {
+  background-color: #ff6f00;
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 1.2rem;
+}
+
+.btn-danger:hover {
+  background-color: #e65c00;
+}
+
+.btn-outline-secondary {
+  border-color: #ffd8a8;
+  color: #2c3e50;
+}
+
+.btn-outline-secondary:hover {
+  background-color: #fff3e0;
+  border-color: #ffb74d;
+}
+
+.form-check-label {
+  color: #2c3e50;
+  font-weight: 500;
+}
+
+#errorMessage {
+  font-size: 0.9rem;
+}
+
+.spinner-border.text-danger {
+  color: #ff6f00 !important;
+}
+
+/* Mobile Responsive */
+@media (max-width: 576px) {
+  .card-body {
+    padding: 1.5rem;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+  }
+
+  .btn-danger {
+    width: 100%;
+  }
+}
