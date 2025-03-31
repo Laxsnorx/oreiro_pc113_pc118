@@ -1,0 +1,25 @@
+body {
+  display: flex;
+  margin: 0;
+  background-color: #DCE2F0;
+}
+
+/* Main Content */
+.main-content {
+  margin-left: 250px;
+  width: calc(100% - 250px);
+  padding: 30px;
+}
+
+table {
+  width: 100%;
+}
+/* Set a fixed width for User ID column */
+/* Just enough space for small User ID numbers */
+th:first-child,
+td:first-child {
+  width: 50px;
+  text-align: center;
+  white-space: nowrap;
+}
+

@@ -1,37 +1,39 @@
-document.addEventListener("DOMContentLoaded", () => {
+$(document).ready(function () {
   const token = localStorage.getItem("token");
-  if (!token) return (window.location.href = "login.php");
+  if (!token) {
+    window.location.href = "login.php";
+    return;
+  }
 
-  async function fetchEmployees() {
-    try {
-      const res = await fetch("http://127.0.0.1:8000/api/employees", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          Accept: "application/json",
-        },
-      });
+  function fetchEmployees() {
+    $.ajax({
+      url: "http://127.0.0.1:8000/api/employees",
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+      success: function (response) {
+        const employees = response.data || response;
+        const tbody = $("#employeeTableBody");
+        tbody.empty(); // Clear any existing rows
 
-      if (!res.ok) throw new Error("Failed to fetch employees");
-
-      const data = await res.json();
-      const employees = data.data || data; // Adjust if API wraps data
-
-      const tbody = document.getElementById("employeeTableBody");
-      tbody.innerHTML = ""; // Clear any existing rows
-
-      employees.forEach((emp) => {
-        const row = document.createElement("tr");
-        row.innerHTML = `
-          <td>${emp.id}</td>
-          <td>${emp.name}</td>
-          <td>${emp.department || "N/A"}</td>
-          <td>${emp.email}</td>
-        `;
-        tbody.appendChild(row);
-      });
-    } catch (e) {
-      console.error("Error loading employees:", e);
-    }
+        employees.forEach(function (emp) {
+          const row = `
+            <tr>
+              <td>${emp.id}</td>
+              <td>${emp.name}</td>
+              <td>${emp.department || "N/A"}</td>
+              <td>${emp.email}</td>
+            </tr>
+          `;
+          tbody.append(row);
+        });
+      },
+      error: function (xhr, status, error) {
+        console.error("Error loading employees:", error);
+      },
+    });
   }
 
   fetchEmployees();

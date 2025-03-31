@@ -1,0 +1,26 @@
+body {
+  display: flex;
+  margin: 0;
+  background-color: #dce2f0;
+}
+
+/* Make content fill the rest of the space */
+.main-content {
+  margin-left: 250px; /* same as sidebar width */
+  width: calc(100% - 250px); /* fill remaining width */
+  padding: 30px;
+}
+
+/* Optional: make sure table stretches full width */
+table {
+  width: 100%;
+}
+/* Make the Student ID column compact, like the Age column */
+    /* Apply fixed width to Employee ID and Department columns */
+    th:nth-child(1), td:nth-child(1), /* Employee ID */
+    th:nth-child(3), td:nth-child(3)  /* Department */
+    {
+      width: 80px; /* adjust as needed */
+      text-align: center;
+      white-space: nowrap;
+    }

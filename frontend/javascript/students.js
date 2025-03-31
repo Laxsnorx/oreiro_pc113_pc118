@@ -1,41 +1,41 @@
-document.addEventListener("DOMContentLoaded", () => {
+$(document).ready(function () {
   const token = localStorage.getItem("token");
-  const tbody = document.getElementById("studentTableBody");
+  const $tbody = $("#studentTableBody");
 
-  // Logout button functionality
-  const logoutBtn = document.getElementById("logoutButton");
-  if (logoutBtn) {
-    logoutBtn.addEventListener("click", () => {
-      localStorage.removeItem("token");
-      fetch("logout.php").then(() => {
-        window.location.href = "login.php";
-      });
-    });
-  }
 
   if (!token) {
     window.location.href = "login.php";
     return;
   }
 
-  fetch("http://127.0.0.1:8000/api/students", {
+
+  $("#logoutButton").on("click", function () {
+    localStorage.removeItem("token");
+
+    $.get("logout.php", function () {
+      window.location.href = "login.php";
+    });
+  });
+
+
+  $.ajax({
+    url: "http://127.0.0.1:8000/api/students",
+    method: "GET",
     headers: {
       Authorization: `Bearer ${token}`,
       Accept: "application/json",
     },
-  })
-    .then((res) => res.json())
-    .then((data) => {
+    success: function (data) {
       console.log("Students:", data);
 
       if (!Array.isArray(data)) {
-        tbody.innerHTML = `<tr><td colspan="5">Invalid data format</td></tr>`;
+        $tbody.html(`<tr><td colspan="5">Invalid data format</td></tr>`);
         return;
       }
 
-      tbody.innerHTML = ""; // Clear any existing rows
+      $tbody.empty();
 
-      data.forEach((student) => {
+      data.forEach(function (student) {
         const row = `
           <tr>
             <td>${student.id}</td>
@@ -45,11 +45,12 @@ document.addEventListener("DOMContentLoaded", () => {
             <td>${student.course || "N/A"}</td>
           </tr>
         `;
-        tbody.insertAdjacentHTML("beforeend", row);
+        $tbody.append(row);
       });
-    })
-    .catch((error) => {
+    },
+    error: function (xhr, status, error) {
       console.error("Error fetching students:", error);
-      tbody.innerHTML = `<tr><td colspan="5">Error loading student data.</td></tr>`;
-    });
+      $tbody.html(`<tr><td colspan="5">Error loading student data.</td></tr>`);
+    },
+  });
 });

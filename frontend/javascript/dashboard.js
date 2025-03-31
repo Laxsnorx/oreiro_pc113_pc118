@@ -1,13 +1,9 @@
-document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("logoutButton").addEventListener("click", () => {
+$(document).ready(function () {
+  $("#logoutButton").on("click", function () {
     localStorage.removeItem("token");
-    fetch("logout.php").then(() => {
+
+    $.get("logout.php", function () {
       window.location.href = "login.php";
     });
   });
-
-  // Your dashboard-specific logic here
-  document.getElementById(
-    "mainContent"
-  ).innerHTML += `<p>Welcome to the Dashboard!</p>`;
 });

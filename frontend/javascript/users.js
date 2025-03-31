@@ -1,32 +1,27 @@
-document.addEventListener("DOMContentLoaded", () => {
+$(document).ready(function () {
   const token = localStorage.getItem("token");
-  const tbody = document.getElementById("userTableBody");
+  const $tbody = $("#userTableBody");
 
   if (!token) {
     window.location.href = "login.php";
     return;
   }
 
-  fetch("http://127.0.0.1:8000/api/user", {
+  $.ajax({
+    url: "http://127.0.0.1:8000/api/user",
+    method: "GET",
     headers: {
       Authorization: `Bearer ${token}`,
       Accept: "application/json",
     },
-  })
-    .then((res) => res.json())
-    .then((data) => {
-      console.log("Users:", data); // Optional: debug
-
+    success: function (data) {
       if (!Array.isArray(data)) {
-        tbody.innerHTML = `<tr><td colspan="4">Invalid data format</td></tr>`;
+        $tbody.html(`<tr><td colspan="4">Invalid data format</td></tr>`);
         return;
       }
 
-      // Clear previous rows if any
-      tbody.innerHTML = "";
-
-      // Populate table rows
-      data.forEach((user) => {
+      $tbody.empty();
+      data.forEach(function (user) {
         const row = `
           <tr>
             <td>${user.id}</td>
@@ -35,11 +30,12 @@ document.addEventListener("DOMContentLoaded", () => {
             <td>${user.role || "N/A"}</td>
           </tr>
         `;
-        tbody.insertAdjacentHTML("beforeend", row);
+        $tbody.append(row);
       });
-    })
-    .catch((error) => {
+    },
+    error: function (xhr, status, error) {
       console.error("Error fetching users:", error);
-      tbody.innerHTML = `<tr><td colspan="4">Error loading user data.</td></tr>`;
-    });
+      $tbody.html(`<tr><td colspan="4">Error loading user data.</td></tr>`);
+    },
+  });
 });

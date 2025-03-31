@@ -29,15 +29,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('/employees', [EmployeeController::class,'store']);
     Route::put('/employees/{id}', [EmployeeController::class, 'update']);
-    Route::get('/employees/{id}', [EmployeeController::class,'show']);
+    Route::get('/employees/{name}', [EmployeeController::class,'show']);
     Route::delete('/employees/{id}', [EmployeeController::class, 'destroy']);
 
     //estudyanteee
-    
-    Route::post('/students', [StudentsController::class,'store']);
-    Route::put('/students/{id}', [StudentsController::class, 'update']);
-    Route::get('/students/{id}', [StudentsController::class,'show']);
-    Route::delete('/students/{id}', [StudentsController::class, 'destroy']);
 });
 
 //!Admin Routes
@@ -52,6 +47,11 @@ Route::middleware(['auth:sanctum','role:user'])->group(function(){
 
 //! Consuming API
 Route::middleware('auth:sanctum')->post('/logout', function (Request $request) {
-    $request->user()->tokens()->delete(); // Revoke all tokens
+    $request->user()->tokens()->delete(); 
     return response()->json(['message' => 'Logged out successfully']);
 });
+
+        Route::post('/students', [StudentsController::class,'store']);
+        Route::put('/students/{id}', [StudentsController::class, 'update']);
+        Route::get('/students/{id}', [StudentsController::class,'show']);
+        Route::delete('/students/{id}', [StudentsController::class, 'destroy']);

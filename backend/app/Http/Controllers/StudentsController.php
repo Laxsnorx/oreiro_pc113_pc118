@@ -44,7 +44,7 @@ class StudentsController extends Controller
         'age' => 'required|integer',
         'email' => 'required|email|unique:students,email',
         'course' => 'required|string|max:255',
-    ]);
+    ]); 
 
     $student= Student::create($validatedData);
     

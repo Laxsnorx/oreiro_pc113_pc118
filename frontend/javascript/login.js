@@ -1,55 +1,66 @@
-document.getElementById("togglePassword").addEventListener("click", () => {
-    let passwordInput = document.getElementById("password");
-    passwordInput.type = passwordInput.type === "password" ? "text" : "password";
-    });
-
+$(document).ready(function () {
     if (localStorage.getItem("token")) {
     window.location.href = "dashboard.php";
+    return;
     }
 
-document
-    .getElementById("loginForm")
-    .addEventListener("submit", async function (event) {
-    event.preventDefault();
 
-    let email = document.getElementById("email").value.trim();
-    let password = document.getElementById("password").value.trim();
-    let errorMessage = document.getElementById("errorMessage");
-    let loader = document.getElementById("loader");
-    let loginButton = document.getElementById("loginButton");
+    $("#togglePassword").on("click", function () {
+    const passwordInput = $("#password");
+    const type =
+        passwordInput.attr("type") === "password" ? "text" : "password";
+    passwordInput.attr("type", type);
+    });
+
+    $("#loginForm").on("submit", function (e) {
+    e.preventDefault();
+
+    const email = $("#email").val().trim();
+    const password = $("#password").val().trim();
+    const errorMessage = $("#errorMessage");
+    const successMessage = $("#successMessage");
+    const loader = $("#loader");
+    const loginButton = $("#loginButton");
+
+
+    errorMessage.hide().text("");
+    successMessage.hide().text("");
 
     if (!email || !password) {
-        errorMessage.textContent = "Both fields are required.";
-        errorMessage.classList.remove("hidden");
+        errorMessage.text("Both fields are required.").fadeIn();
         return;
     }
 
-    errorMessage.classList.add("hidden");
-    loader.style.display = "block"; // Show loader
-    loginButton.disabled = true; // Disable button
+    loader.show();
+    loginButton.prop("disabled", true);
 
-    try {
-        let response = await fetch("http://127.0.0.1:8000/api/login", {
+
+    $.ajax({
+        url: "http://127.0.0.1:8000/api/login",
         method: "POST",
+        contentType: "application/json",
         headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
+        Accept: "application/json",
         },
-        body: JSON.stringify({ email, password }),
-        });
-
-        let data = await response.json();
-
-        if (!response.ok) {
-        throw new Error(data.message || "Login failed. Please try again.");
-        }
+        data: JSON.stringify({ email, password }),
+        success: function (data) {
 
         localStorage.setItem("token", data.token);
-        window.location.href = "dashboard.php";
-    } catch (error) {
-        console.error("Error:", error);
-        errorMessage.textContent =
-        error.message || "An unexpected error occurred.";
-        errorMessage.classList.remove("hidden");
-    }
+        successMessage.text("Logged in successfully!").fadeIn();
+
+        setTimeout(() => {
+            window.location.href = "dashboard.php";
+        }, 1000);
+        },
+        error: function (xhr) {
+        const err =
+            xhr.responseJSON?.message || "Login failed. Please try again.";
+        errorMessage.text(err).fadeIn();
+        },
+        complete: function () {
+        loader.hide();
+        loginButton.prop("disabled", false);
+        },
+        });
     });
+});
