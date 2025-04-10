@@ -1,11 +1,16 @@
 <?php
-
+use App\Http\Controllers\HelloController;
 use App\Http\Controllers\UserDashboardController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\StudentsController;
 use App\Http\Controllers\UserController; //!new
 use Illuminate\Http\Request; 
 use Illuminate\Support\Facades\Route;
+
+
+Route::get('/hello', [HelloController::class, 'index']); //!new
+Route::post('/hello', [HelloController::class, 'store']); //!new
+
 
 
 Route::get('/', function () {
@@ -27,10 +32,6 @@ Route::get('/employees', [EmployeeController::class,'index']);
 // Employees
 Route::middleware('auth:sanctum')->group(function () {
 
-    Route::post('/employees', [EmployeeController::class,'store']);
-    Route::put('/employees/{id}', [EmployeeController::class, 'update']);
-    Route::get('/employees/{name}', [EmployeeController::class,'show']);
-    Route::delete('/employees/{id}', [EmployeeController::class, 'destroy']);
 
     //estudyanteee
 });
@@ -55,3 +56,9 @@ Route::middleware('auth:sanctum')->post('/logout', function (Request $request) {
         Route::put('/students/{id}', [StudentsController::class, 'update']);
         Route::get('/students/{id}', [StudentsController::class,'show']);
         Route::delete('/students/{id}', [StudentsController::class, 'destroy']);
+
+
+        Route::post('/employees', [EmployeeController::class,'store']);
+        Route::put('/employees/{id}', [EmployeeController::class, 'update']);
+        Route::get('/employees/{id}', [EmployeeController::class,'show']);
+        Route::delete('/employees/{id}', [EmployeeController::class, 'destroy']);
