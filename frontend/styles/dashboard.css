@@ -1,63 +1,17 @@
-/* General Reset */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+/* Ensure the main content is properly positioned */
+#mainContent {
+  margin-left: 250px; /* Adjust this based on your sidebar width */
+  padding: 20px;
+  transition: margin-left 0.3s;
 }
 
-/* Body and Main Area */
-body {
-    background-color: #DCE2F0;
-    display: flex;
-    min-height: 100vh;
+/* If the sidebar is collapsible, adjust when collapsed */
+.sidebar-collapsed #mainContent {
+  margin-left: 80px; /* Adjust for collapsed sidebar */
 }
 
-/* Main Content Area */
-main#mainContent {
-    flex: 1;
-    padding: 30px;
-    background-color: #fff;
-    margin-left: 250px; /* Adjust if your sidebar width is different */
-}
-
-/* Card Style Example (if you use Bootstrap cards) */
-.card {
-    border: none;
-    background-color: #DCE2F0;
-    color: #50586C;
-    border-radius: 12px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
-}
-
-/* Section Titles */
-h1, h2, h3 {
-    color: #50586C;
-    margin-bottom: 20px;
-}
-
-/* Button Styling */
-.btn-primary {
-    background-color: #50586C;
-    border-color: #50586C;
-}
-
-.btn-primary:hover {
-    background-color: #3f465a;
-    border-color: #3f465a;
-}
-
-/* Tables (if any) */
-table {
-    background-color: #fff;
-    color: #50586C;
-}
-
-th {
-    background-color: #50586C;
-    color: #DCE2F0;
-}
-
-td {
-    background-color: #f1f4fa;
+/* Ensure table is fully visible */
+.table-responsive {
+  max-width: 100%;
+  overflow-x: auto;
 }

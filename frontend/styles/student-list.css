@@ -1,22 +1,102 @@
+/* General Page Styling */
 body {
-    display: flex;
-    margin: 0;
-    background-color: #dce2f0;
+    background-color: #DCE2F0;
+    font-family: Arial, sans-serif;
 }
 
+/* Main Content */
 .main-content {
     margin-left: 250px;
-    width: calc(100% - 250px);
-    padding: 30px;
+    padding: 20px;
 }
 
-table {
-    width: 100%;
+/* Table Styling */
+.table {
+    background-color: #ffffff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
 }
-/* Make the Student ID column compact, like the Age column */
-th:first-child,
-td:first-child {
-    width: 50px;
-    text-align: center;
-    white-space: nowrap;
+
+.table thead {
+    background-color: #50586C;
+    color: white;
+    text-align: left;
+}
+
+.table tbody tr:hover {
+    background-color: #DCE2F0;
+}
+
+/* Buttons */
+.btn {
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+/* Edit Button - Blue */
+.btn-primary {
+    background-color: #007BFF; /* Bootstrap primary blue */
+    border: none;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+}
+
+/* Delete Button - Red */
+.btn-danger {
+    background-color: #D9534F;
+    border: none;
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: #C9302C;
+}
+
+/* Add Button - Matched Theme */
+.btn-success {
+    background-color: #50586C;
+    border: none;
+    color: white;
+}
+
+.btn-success:hover {
+    background-color: #697089;
+}
+
+/* Search Input */
+#searchEmployee {
+    border: 1px solid #50586C;
+    border-radius: 5px;
+    padding: 5px;
+}
+
+/* Sidebar Styling */
+.sidebar {
+    background-color: #50586C;
+    width: 250px;
+    height: 100vh;
+    position: fixed;
+    color: white;
+    padding: 15px;
+}
+
+.sidebar a {
+    color: white;
+    text-decoration: none;
+    display: block;
+    padding: 10px;
+}
+
+.sidebar a:hover {
+    background-color: #697089;
+    border-radius: 5px;
+}
+
+/* Modals */
+.modal-content {
+    border-radius: 10px;
 }
