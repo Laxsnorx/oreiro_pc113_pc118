@@ -45,6 +45,11 @@ Route::middleware(['auth:sanctum','role:admin'])->group(function(){
 Route::middleware(['auth:sanctum','role:user'])->group(function(){
     Route::get('/userdashboard', [UserDashboardController::class, 'index']);
 });
+Route::middleware('auth:sanctum')->put('/profile/update', [UserController::class, 'updateProfile']);
+// ✅ Add this in routes/api.php
+Route::middleware('auth:sanctum')->get('/profile', function (Request $request) {
+    return response()->json($request->user());
+});
 
 //! Consuming API
 Route::middleware('auth:sanctum')->post('/logout', function (Request $request) {
