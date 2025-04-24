@@ -1,4 +1,13 @@
 <?php
+//////////////////////////////////////////////////////! PC117 - Application Development & Emerging Technologies Routes
+use App\Http\Controllers\Auth\LauthController; 
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/dashboard/admin', fn() => response()->json(['message' => 'Admin Dashboard']))->middleware('role:admin');
+    Route::get('/dashboard/teacher', fn() => response()->json(['message' => 'Teacher Dashboard']))->middleware('role:teacher');
+    Route::get('/dashboard/student', fn() => response()->json(['message' => 'Student Dashboard']))->middleware('role:student');
+});
+//////////////////////////////////////////////////////!
 use App\Http\Controllers\HelloController;
 use App\Http\Controllers\UserDashboardController;
 use App\Http\Controllers\EmployeeController;
@@ -38,18 +47,23 @@ Route::middleware('auth:sanctum')->group(function () {
 
 //!Admin Routes
 Route::middleware(['auth:sanctum','role:admin'])->group(function(){
-    Route::get('/user', [UserController::class, 'index']);
+ 
+    Route::get('/user/{id}', [UserController::class, 'show']); // Show a specific user
+    Route::put('/user/{id}', [UserController::class, 'update']); // Update user details
+    Route::delete('/user/{id}', [UserController::class, 'destroy']); // Delete a user
 });
-
+   Route::get('/user', [UserController::class, 'index']);
+    Route::post('/user', [UserController::class, 'store']); // Create a user
 //!User Routes
 Route::middleware(['auth:sanctum','role:user'])->group(function(){
     Route::get('/userdashboard', [UserDashboardController::class, 'index']);
 });
 Route::middleware('auth:sanctum')->put('/profile/update', [UserController::class, 'updateProfile']);
-// ✅ Add this in routes/api.php
+
 Route::middleware('auth:sanctum')->get('/profile', function (Request $request) {
     return response()->json($request->user());
 });
+
 
 //! Consuming API
 Route::middleware('auth:sanctum')->post('/logout', function (Request $request) {

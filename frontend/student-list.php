@@ -12,6 +12,7 @@
   <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
   <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="styles/student-list.css?v=1.0.1" />
 
 </head>
 <body>
@@ -28,7 +29,7 @@
       <table id="studentTable" class="table table-hover table-bordered">
         <thead class="table-dark">
           <tr>
-            <th>Student ID</th>
+            <th>ID</th>
             <th>Full Name</th>
             <th>Age</th>
             <th>Email</th>
@@ -160,6 +161,8 @@
 
             if (!$.fn.dataTable.isDataTable("#studentTable")) {
               dataTable = $("#studentTable").DataTable({
+                responsive: true,
+                autoWidth: false, // Important to prevent fixed column width issues
                 responsive: true,
                 paging: true,
                 searching: true,

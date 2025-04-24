@@ -13,9 +13,6 @@ class AllowedRolesMiddleware
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-
-
-    //! new
     public function handle(Request $request, Closure $next, ...$roles): Response
     {
         $user = $request->user();
@@ -27,4 +24,3 @@ class AllowedRolesMiddleware
         return $next($request);
     }
 }
-

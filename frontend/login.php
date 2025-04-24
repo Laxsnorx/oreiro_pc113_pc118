@@ -10,8 +10,10 @@
     <meta http-equiv="Expires" content="0">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="http://127.0.0.1/oreiro-reden/frontend/javascript/login.js?v=1.0.4" defer></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="styles/login.css?v=1.0.1" />
+    
 </head>
 <body>
     <div class="container d-flex flex-column justify-content-center align-items-center min-vh-100">
@@ -53,15 +55,100 @@
                         </div>
                         <button type="submit" id="loginButton" class="btn text-white fw-semibold ms-auto" style="background-color: #50586C;">Login</button>
                     </div>
-                    <div class="mb-3">
-                        <div class="text-danger" id="errorMessage" style="display: none;"></div>
-                        <div class="text-success" id="successMessage" style="display: none;"></div>
-                    </div>
                 </form>
             </div>
         </div>
-    </div> 
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+   document.addEventListener("DOMContentLoaded", function () {
+  // Check if the user is already logged in
+  if (localStorage.getItem("token")) {
+    window.location.href = "dashboard.php";
+    return;
+  }
+
+  const togglePassword = document.getElementById("togglePassword");
+  const passwordInput = document.getElementById("password");
+  const loginForm = document.getElementById("loginForm");
+  const emailInput = document.getElementById("email");
+  const loader = document.getElementById("loader");
+  const loginButton = document.getElementById("loginButton");
+
+  // Toggle password visibility
+  togglePassword.addEventListener("click", function () {
+    const type =
+      passwordInput.getAttribute("type") === "password" ? "text" : "password";
+    passwordInput.setAttribute("type", type);
+  });
+
+  // Handle form submission
+  loginForm.addEventListener("submit", function (e) {
+    e.preventDefault(); // Prevent default form submission
+
+    const email = emailInput.value.trim();
+    const password = passwordInput.value.trim();
+
+    if (!email || !password) {
+      Swal.fire({
+        icon: "warning",
+        title: "Missing Fields",
+        text: "Both fields are required.",
+      });
+      return;
+    }
+
+    loader.style.display = "block"; // Show the loading spinner
+    loginButton.disabled = true; // Disable the login button to prevent multiple clicks
+
+    // Perform the login request
+    fetch("http://127.0.0.1:8000/api/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({ email, password }),
+    })
+      .then((response) =>
+        response.json().then((data) => ({
+          status: response.status,
+          body: data,
+        }))
+      )
+      .then(({ status, body }) => {
+        if (status >= 200 && status < 300) {
+          localStorage.setItem("token", body.token);
+          Swal.fire({
+            icon: "success",
+            title: "Success!",
+            text: "Logged in successfully!",
+            timer: 1500,
+            showConfirmButton: false,
+          });
+          // Redirect to the dashboard after successful login
+          setTimeout(() => {
+            window.location.href = "dashboard.php";
+          }, 1600);
+        } else {
+          throw new Error(body.message || "Login failed. Please try again.");
+        }
+      })
+      .catch((error) => {
+        Swal.fire({
+          icon: "error",
+          title: "Login Failed",
+          text: error.message,
+        });
+      })
+      .finally(() => {
+        loader.style.display = "none"; // Hide the loading spinner
+        loginButton.disabled = false; // Enable the login button again
+      });
+  });
+});
+
+    </script>
 </body>
 </html>

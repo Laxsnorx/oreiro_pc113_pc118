@@ -1,16 +1,15 @@
-/* Ensure the main content is properly positioned */
+
 #mainContent {
-  margin-left: 250px; /* Adjust this based on your sidebar width */
+  margin-left: 250px; 
   padding: 20px;
   transition: margin-left 0.3s;
 }
 
-/* If the sidebar is collapsible, adjust when collapsed */
 .sidebar-collapsed #mainContent {
-  margin-left: 80px; /* Adjust for collapsed sidebar */
+  margin-left: 80px; 
 }
 
-/* Ensure table is fully visible */
+
 .table-responsive {
   max-width: 100%;
   overflow-x: auto;
