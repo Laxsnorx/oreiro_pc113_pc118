@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Exception;
 
 
@@ -35,69 +37,89 @@ class UserController extends Controller
         }
     }
 
-
     public function store(Request $request)
 {
-    try {
-        $request->validate([
+    $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
+            'role' => 'required|string',
+            'phone' => 'required|string',
             'password' => 'required|string|min:8',
-            'role' => 'required|in:admin,teacher,student',
-            'file' => 'nullable|file|max:10240', 
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'file' => 'nullable|mimes:pdf,doc,docx|max:10240',
         ]);
 
-        $filePath = null;
-        if ($request->hasFile('file')) {
-            $filePath = $request->file('file')->store('uploads', 'public');
+        try {
+            $user = new User();
+            $user->name = $request->name;
+            $user->email = $request->email;
+            $user->role = $request->role;
+            $user->phone = $request->phone;
+            $user->password = Hash::make($request->password);
+
+            if ($request->hasFile('image')) {
+                $imagePath = $request->file('image')->store('images', 'public');
+                $user->image_url = $imagePath;
+            }
+
+            if ($request->hasFile('file')) {
+                $filePath = $request->file('file')->store('files', 'public');
+                $user->file_url = $filePath;
+            }
+
+            $user->save();
+
+            return response()->json(['data' => $user], 201);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
         }
-
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => bcrypt($request->password),
-            'role' => $request->role,
-            'uploaded_file' => $filePath, 
-        ]);
-
-        return response()->json([
-            'message' => 'User created successfully',
-            'user' => $user,
-        ], 201);
-
-    } catch (Exception $e) {
-        return response()->json([
-            'message' => 'Error creating user',
-            'error' => $e->getMessage(),
-        ], 500);
     }
-}
-
-
 
     public function updateProfile(Request $request)
     {
         $user = $request->user();
 
-        $request->validate([
-            'name' => 'sometimes|string|max:255',
-            'email' => 'sometimes|email|max:255',
-            'uploaded_file' => 'nullable|file|max:10240', 
-        ]);
+    $request->validate([
+        'name' => 'sometimes|string|max:255',
+        'email' => 'sometimes|email|max:255',
+        'phone' => 'sometimes|string|max:20',
+        'file' => 'nullable|file|max:10240',
+        'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:5120',
+    ]);
 
-        if ($request->hasFile('uploaded_file')) {
-            $filePath = $request->file('uploaded_file')->store('uploaded_files', 'public');
-            $user->uploaded_file = $filePath;
+    $filePath = null;
+    $imagePath = null;
+    
+    if ($request->hasFile('uploaded_file')) {
+        if ($user->uploaded_file && Storage::disk('public')->exists($user->uploaded_file)) {
+            Storage::disk('public')->delete($user->uploaded_file);
         }
 
-        $user->name = $request->input('name', $user->name);
-        $user->email = $request->input('email', $user->email);
-        $user->save();
+        $filePath = $request->file('uploaded_file')->store('uploaded_files', 'public');
+        $user->uploaded_file = $filePath;
+    }
+    if ($request->hasFile('uploaded_image')) {
+        if ($user->uploaded_image && Storage::disk('public')->exists($user->uploaded_image)) {
+            Storage::disk('public')->delete($user->uploaded_image);
+        }
 
-        return response()->json([
-            'message' => 'Profile updated successfully',
-            'user' => $user
-        ]);
+        $imagePath = $request->file('uploaded_image')->store('uploaded_images', 'public');
+        $user->uploaded_image = $imagePath;
+    }
+
+    $user->name = $request->input('name', $user->name);
+    $user->email = $request->input('email', $user->email);
+    $user->phone = $request->input('phone', $user->phone);
+
+
+    $user->save();
+
+    return response()->json([
+        'message' => 'Profile updated successfully',
+        'user' => $user,
+        'file_url' => $filePath ? asset('storage/' . $filePath) : null,
+        'image_url' => $imagePath ? asset('storage/' . $imagePath) : null,
+    ]);
     }
 
     public function destroy($id)
@@ -116,7 +138,6 @@ class UserController extends Controller
         }
     }
 
-    // Login a user
     public function login(Request $request)
     {
         try {

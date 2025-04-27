@@ -6,10 +6,9 @@
     <title>Document</title>
 </head>
 <body>
+    <?php include 'sidebar.php'; ?>
     <h1>Student Dashboard</h1>
-<ul>
-    <li><a href="/student/view-grades.html">View Grades</a></li>
-    <li><a href="/student/reports.html">View Reports</a></li>
+    
 </ul>
 
 </body>

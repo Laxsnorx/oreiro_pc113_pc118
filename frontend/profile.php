@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Profile Update</title>
-    <link rel="stylesheet" href="styles/profile.css?v=1.0.1" />
+    <link rel="stylesheet" href="styles/profile.css?v=1.0.2" />
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
@@ -44,7 +44,7 @@
     </div>
 
 <script>
-$(document).ready(function () {
+document.addEventListener("DOMContentLoaded", function () {
     const token = localStorage.getItem("token");
 
     if (!token) {
@@ -52,78 +52,88 @@ $(document).ready(function () {
         return;
     }
 
-    // Fetch user profile
-    $.ajax({
-        url: "http://127.0.0.1:8000/api/profile", // Adjust if needed
+
+    fetch("http://127.0.0.1:8000/api/profile", {
         method: "GET",
         headers: {
             Authorization: `Bearer ${token}`,
             Accept: "application/json",
         },
-        success: function (user) {
-            $("#userId").val(user.id);
-            $("#name").val(user.name);
-            $("#email").val(user.email);
-            $("#role").val(user.role);
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error("Failed to load profile");
+        }
+        return response.json();
+    })
+    .then(user => {
+        document.getElementById("userId").value = user.id;
+        document.getElementById("name").value = user.name;
+        document.getElementById("email").value = user.email;
+        document.getElementById("role").value = user.role;
 
-            // Optional: show welcome message
-            $("#welcome-msg").text(`Logged in as: ${user.name} (${user.email})`);
-        },
-        error: function (xhr) {
-            console.error("Failed to load profile:", xhr.responseText);
-            alert("Error loading profile. Please login again.");
-            localStorage.removeItem("token");
-            window.location.href = "login.php";
-        },
+        const welcomeMsg = document.getElementById("welcome-msg");
+        if (welcomeMsg) {
+            welcomeMsg.textContent = `Logged in as: ${user.name} (${user.email})`;
+        }
+    })
+    .catch(error => {
+        console.error("Failed to load profile:", error);
+        alert("Error loading profile. Please login again.");
+        localStorage.removeItem("token");
+        window.location.href = "login.php";
     });
 
-    // Update form handler
-    $("#profileForm").submit(function (e) {
+
+    const profileForm = document.getElementById("profileForm");
+
+    profileForm.addEventListener("submit", function (e) {
         e.preventDefault();
 
         const formData = {
-            name: $("#name").val(),
-            email: $("#email").val(),
-            password: $("#password").val(),
-            role: $("#role").val(),
+            name: document.getElementById("name").value,
+            email: document.getElementById("email").value,
+            password: document.getElementById("password").value,
+            role: document.getElementById("role").value,
         };
 
-        // Remove empty password from submission
+
         if (!formData.password) {
             delete formData.password;
         }
 
-        $.ajax({
-            url: "http://127.0.0.1:8000/api/profile/update",
+        fetch("http://127.0.0.1:8000/api/profile/update", {
             method: "PUT",
-            contentType: "application/json",
-            data: JSON.stringify(formData),
             headers: {
+                "Content-Type": "application/json",
                 Authorization: `Bearer ${token}`,
                 Accept: "application/json",
             },
-            success: function () {
-                alert("Profile updated successfully!");
-                $("#password").val(""); // Clear password field
-            },
-            error: function (xhr) {
-                console.error("Update error:", xhr);
+            body: JSON.stringify(formData),
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(err => { throw err; });
+            }
+            return response.json();
+        })
+        .then(() => {
+            alert("Profile updated successfully!");
+            document.getElementById("password").value = ""; 
+        })
+        .catch(error => {
+            console.error("Update error:", error);
 
-                let message = "Failed to update profile.";
-                try {
-                    const response = JSON.parse(xhr.responseText);
-                    if (response.message) {
-                        message += " " + response.message;
-                    }
-                } catch (e) {
-                    message += " " + xhr.responseText;
-                }
+            let message = "Failed to update profile.";
+            if (error.message) {
+                message += " " + error.message;
+            }
 
-                alert(message);
-            },
+            alert(message);
         });
     });
 });
+
 </script>
 
 </body>

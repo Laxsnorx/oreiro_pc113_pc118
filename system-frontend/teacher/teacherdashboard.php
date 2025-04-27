@@ -8,11 +8,9 @@
     <title>Document</title>
 </head>
 <body>
+    <?php include 'sidebar.php'; ?>
+
     <h1>Teacher Dashboard</h1>
-<ul>
-    <li><a href="/teacher/grades.html">Manage Grades</a></li>
-    <li><a href="/teacher/reports.html">Grading Reports</a></li>
-</ul>
 
 </body>
 </html>

@@ -42,18 +42,20 @@ Route::get('/employees', [EmployeeController::class,'index']);
 Route::middleware('auth:sanctum')->group(function () {
 
 
-    //estudyanteee
+
 });
 
 //!Admin Routes
 Route::middleware(['auth:sanctum','role:admin'])->group(function(){
- 
-    Route::get('/user/{id}', [UserController::class, 'show']); // Show a specific user
-    Route::put('/user/{id}', [UserController::class, 'update']); // Update user details
-    Route::delete('/user/{id}', [UserController::class, 'destroy']); // Delete a user
+    Route::get('/user', [UserController::class, 'index']);
+    Route::put('/user/{id}', [UserController::class, 'updateProfile']); 
+    Route::post('/user', [UserController::class, 'store']); 
+    Route::get('/user/{id}', [UserController::class, 'show']); 
+
+    Route::delete('/user/{id}', [UserController::class, 'destroy']); 
 });
-   Route::get('/user', [UserController::class, 'index']);
-    Route::post('/user', [UserController::class, 'store']); // Create a user
+
+
 //!User Routes
 Route::middleware(['auth:sanctum','role:user'])->group(function(){
     Route::get('/userdashboard', [UserDashboardController::class, 'index']);
