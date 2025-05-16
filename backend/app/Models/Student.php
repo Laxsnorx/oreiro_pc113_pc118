@@ -13,4 +13,8 @@ class Student extends Model
         'email',
         'course'
         ];
+        public function grades()
+    {
+        return $this->hasMany(Grade::class); // Each student can have multiple grades
+    }
 }

@@ -62,8 +62,8 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-   document.addEventListener("DOMContentLoaded", function () {
-  // Check if the user is already logged in
+    document.addEventListener("DOMContentLoaded", function () {
+
   if (localStorage.getItem("token")) {
     window.location.href = "dashboard.php";
     return;
@@ -76,16 +76,16 @@
   const loader = document.getElementById("loader");
   const loginButton = document.getElementById("loginButton");
 
-  // Toggle password visibility
+
   togglePassword.addEventListener("click", function () {
     const type =
       passwordInput.getAttribute("type") === "password" ? "text" : "password";
     passwordInput.setAttribute("type", type);
   });
 
-  // Handle form submission
+
   loginForm.addEventListener("submit", function (e) {
-    e.preventDefault(); // Prevent default form submission
+    e.preventDefault();
 
     const email = emailInput.value.trim();
     const password = passwordInput.value.trim();

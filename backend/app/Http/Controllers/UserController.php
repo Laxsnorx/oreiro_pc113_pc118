@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Hash;
 use Exception;
 
 
@@ -75,7 +76,9 @@ class UserController extends Controller
         }
     }
 
-    public function updateProfile(Request $request)
+    
+
+    public function updateProfile(Request $request, $id)
     {
         $user = $request->user();
 
@@ -121,6 +124,37 @@ class UserController extends Controller
         'image_url' => $imagePath ? asset('storage/' . $imagePath) : null,
     ]);
     }
+    
+    public function update(Request $request, $id)
+{
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'email' => 'required|email|max:255|unique:users,email,' . $id,
+        'role' => 'required|string',
+        'phone' => 'nullable|string|max:20',
+    ]);
+
+    try {
+        $user = User::findOrFail($id);
+
+        $user->name = $request->name;
+        $user->email = $request->email;
+        $user->role = $request->role;
+        $user->phone = $request->phone;
+
+        $user->save();
+
+        return response()->json([
+            'message' => 'User updated successfully',
+            'user' => $user,
+        ], 200);
+    } catch (Exception $e) {
+        return response()->json([
+            'message' => 'Error updating user',
+            'error' => $e->getMessage(),
+        ], 500);
+    }
+}
 
     public function destroy($id)
     {

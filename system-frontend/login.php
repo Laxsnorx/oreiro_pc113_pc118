@@ -3,10 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Login</title>
-
-  <!-- SweetAlert2 -->
+  <title>PerdSheet Login</title>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
 
   <style>
     * {
@@ -16,46 +17,49 @@
     }
 
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #DCE2F0;
+      font-family: 'Poppins', sans-serif;
+      min-height: 100vh;
+      background: #eaeef6;
       display: flex;
       justify-content: center;
       align-items: center;
-      min-height: 100vh;
+      overflow: hidden;
+      position: relative;
     }
 
     .form_main {
       width: 90%;
-      max-width: 360px;
-      background-color: #fff;
+      max-width: 400px;
+      background: rgba(255, 255, 255, 0.85);
       padding: 40px 30px;
-      box-shadow: 0px 5px 40px rgba(0, 0, 0, 0.1);
-      border-radius: 20px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+      border-radius: 12px;
       position: relative;
-      overflow: hidden;
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+      z-index: 1;
     }
 
-    .form_main::before {
-      content: "";
-      position: absolute;
-      width: 350px;
-      height: 350px;
-      background-color: #d1c1ff;
-      transform: rotate(45deg);
-      left: -200px;
-      bottom: 50px;
-      z-index: 1;
-      border-radius: 30px;
+    .logo {
+      text-align: center;
+      font-size: 2.75rem;
+      font-weight: 800;
+      background: linear-gradient(90deg, #4A90E2, #88C3F7);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 10px;
+      font-family: 'Poppins', sans-serif;
+      letter-spacing: 1px;
     }
 
     .heading {
-      font-size: 2rem;
-      font-weight: bold;
-      color: #2e2e2e;
       text-align: center;
+      font-size: 1.1rem;
+      color: #b0b0b0; /* Light gray */
+      font-weight: 400;
       margin-bottom: 25px;
-      z-index: 2;
-      position: relative;
+      font-style: italic;
+      opacity: 0.95;
     }
 
     .inputContainer {
@@ -67,7 +71,7 @@
 
     .inputIcon {
       position: absolute;
-      left: 10px;
+      left: 12px;
       top: 50%;
       transform: translateY(-50%);
       z-index: 3;
@@ -76,41 +80,54 @@
     .inputField {
       width: 100%;
       height: 45px;
-      padding-left: 35px;
+      padding-left: 40px;
       font-size: 1rem;
       border: none;
       border-bottom: 2px solid #ccc;
       background-color: transparent;
       color: #333;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
     }
 
     .inputField:focus {
       outline: none;
-      border-color: #a268ff;
+      border-color: #66a3ff;
+      box-shadow: 0 0 5px rgba(102, 163, 255, 0.6);
     }
 
     .inputField::placeholder {
       color: #888;
     }
 
+    .inputField:hover {
+      border-color: #66a3ff;
+    }
+
     #button {
       width: 100%;
       height: 45px;
-      background-color: #a268ff;
+      background-color: #4A90E2;
       border: none;
       color: #fff;
       font-size: 1rem;
       font-weight: bold;
       margin-top: 10px;
-      border-radius: 5px;
+      border-radius: 8px;
       cursor: pointer;
-      transition: background-color 0.3s;
+      transition: background-color 0.3s, transform 0.3s ease, box-shadow 0.3s ease;
       z-index: 2;
       position: relative;
     }
 
     #button:hover {
-      background-color: #7e54ff;
+      background-color: #357ABD;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    #button:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     }
 
     .forgotLink {
@@ -118,10 +135,95 @@
       text-align: center;
       margin-top: 15px;
       font-size: 0.85rem;
-      color: #2c1880;
+      color: #406ff3;
       text-decoration: none;
       z-index: 2;
       position: relative;
+      transition: color 0.3s ease;
+    }
+
+    .forgotLink:hover {
+      color: #2c1880;
+      text-decoration: underline;
+    }
+
+    /* Floating Icons */
+    .floating-icons {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .floating-icons img {
+      position: absolute;
+      width: 60px;
+      height: 60px;
+      opacity: 0.7;
+      animation: floatIcons 12s infinite ease-in-out;
+      animation-delay: calc(2s * var(--index)); /* Add delay based on index for staggered effect */
+    }
+
+    /* Randomize Icon Position */
+    .floating-icons img:nth-child(1) {
+      top: 5%;
+      left: 8%;
+    }
+
+    .floating-icons img:nth-child(2) {
+      top: 20%;
+      left: 25%;
+    }
+
+    .floating-icons img:nth-child(3) {
+      top: 35%;
+      left: 50%;
+    }
+
+    .floating-icons img:nth-child(4) {
+      top: 55%;
+      left: 70%;
+    }
+
+    .floating-icons img:nth-child(5) {
+      top: 10%;
+      left: 85%;
+    }
+
+    .floating-icons img:nth-child(6) {
+      top: 45%;
+      left: 80%;
+    }
+
+    .floating-icons img:nth-child(7) {
+      top: 60%;
+      left: 30%;
+    }
+
+    .floating-icons img:nth-child(8) {
+      top: 70%;
+      left: 20%;
+    }
+
+    .floating-icons img:nth-child(9) {
+      top: 15%;
+      left: 60%;
+    }
+
+    .floating-icons img:nth-child(10) {
+      top: 75%;
+      left: 40%;
+    }
+
+    @keyframes floatIcons {
+      0% { transform: translateY(0) rotate(0); }
+      25% { transform: translateY(-20px) rotate(15deg); }
+      50% { transform: translateY(0) rotate(0); }
+      75% { transform: translateY(20px) rotate(-15deg); }
+      100% { transform: translateY(0) rotate(0); }
     }
 
     @media (max-width: 480px) {
@@ -141,25 +243,32 @@
 </head>
 <body>
 
+  <!-- Floating Icons -->
+  <div class="floating-icons">
+    <img src="https://cdn-icons-png.flaticon.com/512/1046/1046784.png" alt="school" style="--index: 1;">
+    <img src="https://cdn-icons-png.flaticon.com/512/206/206039.png" alt="gradebook" style="--index: 2;">
+    <img src="https://cdn-icons-png.flaticon.com/512/126/126495.png" alt="certificate" style="--index: 3;">
+    <img src="https://cdn-icons-png.flaticon.com/512/1007/1007891.png" alt="student" style="--index: 4;">
+    <img src="https://cdn-icons-png.flaticon.com/512/349/349063.png" alt="paper" style="--index: 5;">
+    <img src="https://cdn-icons-png.flaticon.com/512/1643/1643947.png" alt="books" style="--index: 6;">
+    <img src="https://cdn-icons-png.flaticon.com/512/2872/2872805.png" alt="teacher" style="--index: 7;">
+    <img src="https://cdn-icons-png.flaticon.com/512/2575/2575266.png" alt="assignment" style="--index: 8;">
+  </div>
+
+  <!-- Login Form -->
   <form class="form_main" id="loginForm">
-    <p class="heading">Login</p>
-
+    <div class="logo">PerdSheet</div>
+    <p class="heading">Welcome back! Login to your account</p>
     <div class="inputContainer">
-      <svg class="inputIcon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#2e2e2e" viewBox="0 0 16 16">
-        <path d="M13.106 7.222c0-2.967-2.249-5.032-5.482-5.032-3.35 0-5.646 2.318-5.646 5.702 0 3.493 2.235 5.708 5.762 5.708.862 0 1.689-.123 2.304-.335v-.862c-.43.199-1.354.328-2.29.328-2.926 0-4.813-1.88-4.813-4.798 0-2.844 1.921-4.881 4.594-4.881 2.735 0 4.608 1.688 4.608 4.156 0 1.682-.554 2.769-1.416 2.769-.492 0-.772-.28-.772-.76V5.206H8.923v.834h-.11c-.266-.595-.881-.964-1.6-.964-1.4 0-2.378 1.162-2.378 2.823 0 1.737.957 2.906 2.379 2.906.8 0 1.415-.39 1.709-1.087h.11c.081.67.703 1.148 1.503 1.148 1.572 0 2.57-1.415 2.57-3.643zm-7.177.704c0-1.197.54-1.907 1.456-1.907.93 0 1.524.738 1.524 1.907S8.308 9.84 7.371 9.84c-.895 0-1.442-.725-1.442-1.914z"></path>
-      </svg>
-      <input type="text" class="inputField" id="email" placeholder="Email" required>
+      <i class="fas fa-envelope inputIcon"></i> <!-- Font Awesome email icon -->
+      <input type="text" id="email" class="inputField" placeholder="email" required />
     </div>
-
     <div class="inputContainer">
-      <svg class="inputIcon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#2e2e2e" viewBox="0 0 16 16">
-        <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/>
-      </svg>
-      <input type="password" class="inputField" id="password" placeholder="Password" required>
+      <i class="fas fa-lock inputIcon"></i> <!-- Font Awesome lock icon -->
+      <input type="password" id="password" class="inputField" placeholder="Password" required />
     </div>
-
     <button type="submit" id="button">Login</button>
-    <a class="forgotLink" href="#">Forgot your password?</a>
+    <a href="#" class="forgotLink">Forgot password?</a>
   </form>
 
 <script>
@@ -176,7 +285,7 @@
           "Content-Type": "application/json",
           Accept: "application/json",
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password }), // using username instead of email
       });
 
       if (!response.ok) throw new Error("Invalid credentials");
@@ -195,16 +304,15 @@
 
       setTimeout(() => {
         const role = data.user.role;
-        if (data.user.role === "admin") {
-    window.location.href = "admin/admindashboard.php"; 
-} else if (data.user.role === "teacher") {
-    window.location.href = "teacher/teacherdashboard.php"; 
-} else if (data.user.role === "student") {
-    window.location.href = "students/studentdashboard.php"; 
-} else {
-    Swal.fire("Unknown role", "Redirect failed", "error");
-}
-
+        if (role === "admin") {
+          window.location.href = "admin/admindashboard.php";
+        } else if (role === "teacher") {
+          window.location.href = "teacher/teacherdashboard.php";
+        } else if (role === "student") {
+          window.location.href = "students/studentdashboard.php";
+        } else {
+          Swal.fire("Unknown role", "Redirect failed", "error");
+        }
       }, 1600);
 
     } catch (err) {
@@ -212,6 +320,7 @@
     }
   });
 </script>
+
 
 </body>
 </html>

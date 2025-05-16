@@ -6,8 +6,6 @@
   <title>Admin Sidebar</title>
   <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@600&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
 
   <style>
     body {
@@ -61,17 +59,6 @@
     .navbar__link span {
       margin-left: 12px;
     }
-    .navbar__item.dropdown:hover .dropdown-content {
-  display: block;
-}
-
-.navbar__item.dropdown .dropdown-content {
-  display: none;
-  list-style: none;
-  padding-left: 1rem;
-  margin-top: 0.2rem;
-}
-
     body {
       font-family: 'Poppins', sans-serif;
     }
@@ -111,7 +98,7 @@
     .logo-text {
       font-size: 28px;
       font-weight: 800;
-      color: #406ff3;
+      color: #4A90E2;
       margin-left: 0;
     }
 
@@ -255,13 +242,13 @@
 <!-- Header -->
 <div class="header">
   <div class="header__user">
-    <!-- <img src="profile-pic.jpg" alt="User Profile"> -->
+    <img src="profile-pic.jpg" alt="User Profile">
     <span>John Doe</span>
     <div class="dropdown">
       <button class="dropdown-button">☰</button>
       <div class="dropdown-content">
-        <a href="#" onclick="redirectToProfileManagement()">Profile</a>
-        <button id="logoutButton">Logout</button>
+        <a href="#">Profile</a>
+        <a href="#">Logout</a>
       </div>
     </div>
   </div>
@@ -280,22 +267,17 @@
       </a>
     </li>
     <li class="navbar__item">
-      <a href="#" class="navbar__link" onclick="redirectToGradesManagement()" >
+      <a href="#" class="navbar__link">
         <i data-feather="book-open"></i><span>Grades Management</span>
       </a>
     </li>
-    <li class="navbar__item dropdown">
-  <a href="#" class="navbar__link">
-    <i data-feather="users"></i><span>User Management ▾</span>
-  </a>
-  <ul class="dropdown-content" style="margin-left: 2.5rem; position: static; background: none; box-shadow: none; padding-left: 1rem;">
-    <li><a href="admin-management.php" class="navbar__link">Admins</a></li>
-    <li><a href="#" class="navbar__link" onclick="redirectToInstructorManagement()">Instructors</a></li>
-    <li><a href="#" class="navbar__link" onclick="redirectToStudentManagement()" >Students</a></li>
-  </ul>
-</li>
     <li class="navbar__item">
-      <a href="#" class="navbar__link" onclick="redirectToReportsManagement()" >
+      <a href="#" class="navbar__link">
+        <i data-feather="users"></i><span>User Management</span>
+      </a>
+    </li>
+    <li class="navbar__item">
+      <a href="#" class="navbar__link">
         <i data-feather="file-text"></i><span>Reports Management</span>
       </a>
     </li>
@@ -304,69 +286,6 @@
 
 <script>
   feather.replace();
-  
-  // Check user role (you can fetch this from localStorage/sessionStorage or from the backend)
-  const userRole = localStorage.getItem('userRole'); // 'admin', 'teacher', 'student'
-
-  // Hide User Management link if the user is not an admin
-  if (userRole !== 'admin') {
-    const userManagementItem = document.querySelector('.user-management-item');
-    if (userManagementItem) {
-      userManagementItem.style.display = 'none';  // Hide the user management link for non-admins
-    }
-  }
-
-  document.getElementById('logoutButton').addEventListener('click', function() {
-    Swal.fire({
-        title: 'Are you sure?',
-        text: "You will be logged out.",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Yes, log out!',
-        cancelButtonText: 'Cancel',
-        reverseButtons: true
-    }).then((result) => {
-        if (result.isConfirmed) {
-            localStorage.removeItem('authToken');  
-            sessionStorage.removeItem('authToken');  
-            localStorage.clear();
-            sessionStorage.clear();
-            
-            // Show a "logged out successfully" SweetAlert
-            Swal.fire({
-                title: 'Logged out successfully!',
-                icon: 'success',
-                confirmButtonText: 'OK'
-            }).then(() => {
-                // Redirect to the login page after showing the success message
-                window.location.href = '/oreiro-reden/system-frontend/login.php';
-            });
-        }
-    });
-});
-
-function redirectToGradesManagement() {
-    window.location.href = 'grade-management.php';
-}
-
-function redirectToUserManagement() {
-    window.location.href = 'user-management.php';
-}
-
-function redirectToProfileManagement() {
-    window.location.href = 'profile.php';
-}
-
-function redirectToReportsManagement() {
-    window.location.href = 'reports-management.php';
-}
-function redirectToStudentManagement() {
-    window.location.href = 'student-management.php';
-}
-function redirectToInstructorManagement() {
-    window.location.href = 'instructor-management.php';
-}
-
 </script>
 
 </body>

@@ -159,6 +159,7 @@
   function fetchUsers() {
   fetch(apiUrl, {
     method: "GET",
+    mode: "no-cors", // This will disable CORS checks
     headers: {
       Authorization: `Bearer ${token}`,
     },

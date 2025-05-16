@@ -95,7 +95,7 @@ class EmployeeController extends Controller
         return response()->json([
             'message'=>'Employee updated successfully',
             'employee'=>$employee
-        ],200);
+        ],200);             
     }
 
     /**
