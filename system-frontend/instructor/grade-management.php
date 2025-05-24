@@ -147,7 +147,10 @@
     background-color: #2c5fe0;
     font-weight: bold;
   }
-
+  .custom-swal-popup {
+    font-size: 13px;
+    padding: 15px;
+  }
   </style>
 </head>
 <body>
@@ -270,108 +273,92 @@ function renderPaginationControls() {
   }
 }
 
-function viewGrades(studentId) {
+function viewGrades(studentId) { 
   const token = localStorage.getItem("token");
 
-  // Fetch student details
   fetch(`http://127.0.0.1:8000/api/students/${studentId}`, {
     headers: {
       Authorization: `Bearer ${token}`
     }
   })
-    .then(res => res.json())
-    .then(student => {
-      // Fetch student's grades
-      fetch(`http://127.0.0.1:8000/api/students/${studentId}/grades`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      })
-        .then(res => {
-          if (!res.ok) throw new Error("Grades not found");
-          return res.json();
-        })
-        .then(grades => {
-          // Limit the grades to the first 9 subjects
-          const limitedGrades = grades.slice(0, 9);
+  .then(res => res.json())
+  .then(student => {
+    fetch(`http://127.0.0.1:8000/api/students/${studentId}/grades`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+    .then(res => {
+      if (!res.ok) throw new Error("Grades not found");
+      return res.json();
+    })
+    .then(grades => {
+      const limitedGrades = grades.slice(0, 9);
+      let leftColumn = "", rightColumn = "";
+      let totalUnits = 0;
+      let overallStatus = 'Passed';
+      let totalGradePoints = 0;
 
-          let leftColumn = "", rightColumn = "";
-          let totalUnits = 0; // To keep track of the total units
-          let overallStatus = 'Passed'; // Default overall status
-          let totalGradePoints = 0; // To calculate GPA
+      limitedGrades.forEach((grade, index) => {
+        const midterm = parseFloat(grade.midterm_grade) || 0;
+        const final = parseFloat(grade.final_grade) || 0;
+        const avg = (midterm + final) / 2;
+        const status = avg >= 1.00 && avg <= 3.00 ? 'Passed' : 'Fail';
+        const statusColor = status === 'Passed' ? 'green' : 'red';
 
-          limitedGrades.forEach((grade, index) => {
-            const gradeValue = parseFloat(grade.grade);
-            const status = gradeValue >= 1.00 && gradeValue <= 3.00 ? 'Passed' : 'Fail';
-            const statusColor = status === 'Passed' ? 'green' : 'red';
+        const entry = ` 
+          <div style="margin-bottom: 10px; font-size: 14px;">
+            <strong>Subject:</strong> ${grade.subject?.name || 'N/A'}<br>
+            <strong>Midterm:</strong> ${grade.midterm_grade ?? 'N/A'}<br>
+            <strong>Final:</strong> ${grade.final_grade ?? 'N/A'}<br>
+            <strong>Average:</strong> ${avg.toFixed(2)} 
+            <span style="font-size: 12px; padding: 2px 8px; margin-left: 10px; background-color: ${statusColor}; color: white; border-radius: 12px;">
+              ${status}
+            </span>
+          </div>
+        `;
 
-            const entry = ` 
-              <div style="margin-bottom: 10px; font-size: 14px;">
-                <strong>Subject:</strong> ${grade.subject?.name || 'N/A'}<br>
-                <strong>Grade:</strong> ${grade.grade} 
-                <span style="font-size: 12px; padding: 2px 8px; margin-left: 10px; background-color: ${statusColor}; color: white; border-radius: 12px;">
-                  ${status}
-                </span>
-              </div>
-            `;
-            if (index % 2 === 0) {
-              leftColumn += entry;
-            } else {
-              rightColumn += entry;
-            }
+        if (index % 2 === 0) leftColumn += entry;
+        else rightColumn += entry;
 
-            // Calculate total units
-            totalUnits += grade.subject?.units || 0;
+        totalUnits += grade.subject?.units || 0;
+        totalGradePoints += avg;
+        if (status === 'Fail') overallStatus = 'Fail';
+      });
 
-            // Calculate total grade points for GPA
-            totalGradePoints += gradeValue;
+      const gpa = (totalGradePoints / limitedGrades.length).toFixed(2);
+      const overallStatusColor = overallStatus === 'Passed' ? 'green' : 'red';
 
-            // If any grade is "Fail", update the overall status
-            if (status === 'Fail') {
-              overallStatus = 'Fail';
-            }
-          });
+      const gradesHtml = ` 
+        <div style="display: flex; gap: 20px;">
+          <div style="flex: 1;">${leftColumn}</div>
+          <div style="flex: 1;">${rightColumn}</div>
+        </div>
+        <div style="text-align: center; margin-top: 20px;">
+          <button onclick="editGrades(${studentId})" style="padding: 8px 16px; font-size: 14px;">Edit Grades</button>
+        </div>
+        <div style="margin-top: 20px; font-size: 16px;">
+          <strong>Total Units: </strong>${totalUnits}
+        </div>
+        <div style="font-size: 16px; margin-top: 10px;">
+          <strong>GPA: </strong>${gpa}
+        </div>
+        <div style="font-size: 16px; margin-top: 10px;">
+          <strong>Overall Status: </strong>
+          <span style="font-size: 14px; padding: 4px 12px; background-color: ${overallStatusColor}; color: white; border-radius: 12px;">
+            ${overallStatus}
+          </span>
+        </div>
+      `;
 
-          // Calculate GPA (average of grade points)
-          const gpa = (totalGradePoints / limitedGrades.length).toFixed(2);
-
-          // Overall status color
-          const overallStatusColor = overallStatus === 'Passed' ? 'green' : 'red';
-
-          const gradesHtml = ` 
-            <div style="display: flex; gap: 20px;">
-              <div style="flex: 1;">${leftColumn}</div>
-              <div style="flex: 1;">${rightColumn}</div>
-            </div>
-            <div style="text-align: center; margin-top: 20px;">
-              <button onclick="editGrades(${studentId})" style="padding: 8px 16px; font-size: 14px;">Edit Grades</button>
-            </div>
-            <div style="margin-top: 20px; font-size: 16px;">
-              <strong>Total Units: </strong>${totalUnits}
-            </div>
-            <div style="font-size: 16px; margin-top: 10px;">
-              <strong>GPA: </strong>${gpa}
-            </div>
-            <div style="font-size: 16px; margin-top: 10px;">
-              <strong>Overall Status: </strong>
-              <span style="font-size: 14px; padding: 4px 12px; background-color: ${overallStatusColor}; color: white; border-radius: 12px;">
-                ${overallStatus}
-              </span>
-            </div>
-          `;
-
-          Swal.fire({
-            title: `<span style="font-size: 20px;">${student.name}'s Grades</span>`,
-            html: gradesHtml,
-            showConfirmButton: false
-          });
-        });
+      Swal.fire({
+        title: `<span style="font-size: 20px;">${student.name}'s Grades</span>`,
+        html: gradesHtml,
+        showConfirmButton: false
+      });
     });
+  });
 }
-
-
-
-
 
 function editGrades(studentId) {
   const token = localStorage.getItem("token");
@@ -383,60 +370,86 @@ function editGrades(studentId) {
   })
     .then(res => res.json())
     .then(grades => {
-      const limitedGrades = grades.slice(0, 9); // Limit to 9 subjects as requested
-
+      const limitedGrades = grades.slice(0, 9);
       let leftColumn = "", rightColumn = "";
 
       limitedGrades.forEach((grade, index) => {
         const inputHtml = `
-          <div style="margin-bottom: 10px; font-size: 14px; display: flex; align-items: center; gap: 10px;">
-            <label style="flex: 1;"><strong>${grade.subject?.name || 'Subject ' + (index + 1)}</strong></label>
-            <input id="grade-${grade.id}" class="swal2-input" style="font-size: 14px; height: 30px; flex: 1;" type="text" value="${grade.grade}">
+          <div style="margin-bottom: 10px; font-size: 13px;">
+            <label style="display:block; margin-bottom: 4px;"><strong>${grade.subject?.name || 'Subject ' + (index + 1)}</strong></label>
+            <div style="display: flex; gap: 6px;">
+              <input id="midterm-${grade.id}" class="swal2-input" 
+                     style="width: 120px; height: 28px; font-size: 12px; padding: 4px;" 
+                     placeholder="Midterm Grade" 
+                     value="${grade.midterm_grade ?? ''}">
+              <input id="final-${grade.id}" class="swal2-input" 
+                     style="width: 120px; height: 28px; font-size: 12px; padding: 4px;" 
+                     placeholder="Final Grade" 
+                     value="${grade.final_grade ?? ''}">
+            </div>
           </div>
         `;
-        if (index % 2 === 0) {
-          leftColumn += inputHtml;
-        } else {
-          rightColumn += inputHtml;
-        }
+        if (index % 2 === 0) leftColumn += inputHtml;
+        else rightColumn += inputHtml;
       });
 
       const formHtml = `
-        <div style="display: flex; gap: 20px;">
-          <div style="flex: 1; display: flex; flex-direction: column;">${leftColumn}</div>
-          <div style="flex: 1; display: flex; flex-direction: column;">${rightColumn}</div>
+        <div style="display: flex; gap: 10px;">
+          <div style="flex: 1;">${leftColumn}</div>
+          <div style="flex: 1;">${rightColumn}</div>
         </div>
       `;
 
       Swal.fire({
-        title: `<span style="font-size: 20px;">Edit Grades</span>`,
+        title: `<span style="font-size: 18px;">Edit Grades</span>`,
         html: formHtml,
+        width: '700px',
         confirmButtonText: 'Save',
         showCancelButton: true,
+        focusConfirm: false, // prevents focus override
         preConfirm: () => {
           const updates = {};
+          let hasError = false;
+
           limitedGrades.forEach(grade => {
-            updates[grade.id] = document.getElementById(`grade-${grade.id}`).value;
+            const midtermInput = document.getElementById(`midterm-${grade.id}`);
+            const finalInput = document.getElementById(`final-${grade.id}`);
+
+            if (!midtermInput || !finalInput) {
+              hasError = true;
+              return;
+            }
+
+            updates[grade.id] = {
+              midterm_grade: midtermInput.value,
+              final_grade: finalInput.value
+            };
           });
+
+          if (hasError) {
+            Swal.showValidationMessage('Some inputs are missing.');
+            return false;
+          }
+
           return updates;
         }
       }).then(result => {
         if (result.isConfirmed) {
-          const updateRequests = Object.entries(result.value).map(([id, newGrade]) => {
+          const updateRequests = Object.entries(result.value).map(([id, updated]) => {
             return fetch(`http://127.0.0.1:8000/api/grades/${id}`, {
               method: "PUT",
               headers: {
                 Authorization: `Bearer ${token}`,
                 'Content-Type': 'application/json'
               },
-              body: JSON.stringify({ grade: newGrade })
+              body: JSON.stringify(updated)
             });
           });
 
           Promise.all(updateRequests)
             .then(() => {
               Swal.fire("Success", "Grades updated successfully!", "success");
-              viewGrades(studentId); // Refresh grades view
+              viewGrades(studentId); // refresh view
             })
             .catch(() => {
               Swal.fire("Error", "Failed to update grades.", "error");
@@ -445,7 +458,6 @@ function editGrades(studentId) {
       });
     });
 }
-
 
 function deleteStudent(id) {
   const token = localStorage.getItem("token");

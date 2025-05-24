@@ -1,15 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Student Sidebar</title>
-  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@600&display=swap" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Sidebar</title>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 
   <style>
-      body {
+    body {
   background: #eaeef6;
   font-family: 'Open Sans', sans-serif;
   margin: 0;
@@ -260,23 +261,27 @@ button:hover {
     padding: 0.8rem 1.2rem;
   }
 }
+
   </style>
   <script src="https://unpkg.com/feather-icons"></script>
 </head>
 <body>
 
-  <!-- Header -->
-  <div class="header">
-    <div class="header__user dropdown" aria-label="User menu">
-      <img src="https://ui-avatars.com/api/?name=User&background=406ff3&color=fff&rounded=true" alt="User Avatar" id="userAvatar" />
-      <span id="userName">Loading...</span>
-      <button class="dropdown-button" aria-haspopup="true" aria-expanded="false" aria-controls="userDropdown" id="dropdownButton">▼</button>
-      <div class="dropdown-content" role="menu" aria-hidden="true" id="userDropdown">
-        <a href="#" onclick="redirectToProfileManagement()" role="menuitem" tabindex="0">Profile</a>
-        <a href="#" id="logoutButton" role="menuitem" tabindex="0">Logout</a>
-      </div>
+<!-- Header -->
+<!-- Header -->
+<div class="header">
+  <div class="header__user dropdown" aria-label="User menu">
+    <img src="https://ui-avatars.com/api/?name=User&background=406ff3&color=fff&rounded=true" alt="User Avatar" id="userAvatar" />
+    <span id="userName">Loading...</span>
+    <button class="dropdown-button" aria-haspopup="true" aria-expanded="false" aria-controls="userDropdown" id="dropdownButton">▼</button>
+    <div class="dropdown-content" role="menu" aria-hidden="true" id="userDropdown">
+      <a href="#" onclick="redirectToProfileManagement()" role="menuitem" tabindex="0">Profile</a>
+      <a href="#" id="logoutButton" role="menuitem" tabindex="0">Logout</a>
     </div>
   </div>
+</div>
+
+
 
   <!-- Sidebar -->
   <nav class="navbar" role="navigation" aria-label="Sidebar navigation">
@@ -285,86 +290,98 @@ button:hover {
         <img src="../public/images/logo.png" alt="PerdSheet Logo" class="logo-icon" />
         <span class="logo-text">PerdSheet</span>
       </div>
-
       <li class="navbar__item">
-        <a href="#" class="navbar__link" onclick="redirectToStudentDashboard()">
+        <a href="#" class="navbar__link" onclick='redirectToInstructorDashboard()'>
           <i data-feather="grid"></i><span>Dashboard</span>
         </a>
       </li>
-
       <li class="navbar__item">
-        <a href="#" class="navbar__link" onclick="redirectToStudentGrades()">
-          <i data-feather="bar-chart-2"></i><span>View Grades</span>
+        <a href="#" class="navbar__link" onclick="redirectToGradesManagement()">
+          <i data-feather="book-open"></i><span>Grades Management</span>
         </a>
       </li>
-
       <li class="navbar__item">
-        <a href="#" class="navbar__link">
-          <i data-feather="file"></i><span>View Reports</span>
+        <a href="#" class="navbar__link" onclick="redirectToReportsManagement()">
+          <i data-feather="file-text"></i><span>Reports Management</span>
         </a>
       </li>
-
     </ul>
   </nav>
+<script>
+// Activate feather icons
+feather.replace();
 
-  <script>
-    // Activate feather icons
-    feather.replace();
+// Get user from localStorage (expected format: { name: "...", avatar: "url" })
+const user = JSON.parse(localStorage.getItem('user'));
 
-    // Get user from localStorage (expected format: { name: "...", avatar: "url" })
-    const user = JSON.parse(localStorage.getItem('user'));
+if (user && user.name) {
+  document.getElementById('userName').textContent = user.name;
 
-    if (user && user.name) {
-      document.getElementById('userName').textContent = user.name;
+  if (user.avatar) {
+    document.getElementById('userAvatar').src = user.avatar;
+  } else {
+    // fallback: initials avatar
+    const initials = user.name.split(' ').map(n => n[0]).join('');
+    document.getElementById('userAvatar').src = `https://ui-avatars.com/api/?name=${initials}&background=406ff3&color=fff&rounded=true`;
+  }
+} else {
+  // guest fallback
+  document.getElementById('userName').textContent = 'Guest';
+  document.getElementById('userAvatar').src = `https://ui-avatars.com/api/?name=Guest&background=999&color=fff&rounded=true`;
+}
 
-      if (user.avatar) {
-        document.getElementById('userAvatar').src = user.avatar;
-      } else {
-        // fallback: initials avatar
-        const initials = user.name.split(' ').map(n => n[0]).join('');
-        document.getElementById('userAvatar').src = `https://ui-avatars.com/api/?name=${initials}&background=406ff3&color=fff&rounded=true`;
-      }
-    } else {
-      // guest fallback
-      document.getElementById('userName').textContent = 'Guest';
-      document.getElementById('userAvatar').src = `https://ui-avatars.com/api/?name=Guest&background=999&color=fff&rounded=true`;
-    }
-
-    // Logout button with SweetAlert2 confirmation
-    document.getElementById('logoutButton').addEventListener('click', function (e) {
-      e.preventDefault();
+// Logout button with SweetAlert2 confirmation
+document.getElementById('logoutButton').addEventListener('click', function (e) {
+  e.preventDefault();
+  Swal.fire({
+    title: 'Are you sure?',
+    text: "You will be logged out.",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Yes, log out!',
+    cancelButtonText: 'Cancel',
+    reverseButtons: true
+  }).then((result) => {
+    if (result.isConfirmed) {
+      localStorage.clear();
+      sessionStorage.clear();
       Swal.fire({
-        title: 'Are you sure?',
-        text: "You will be logged out.",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Yes, log out!',
-        cancelButtonText: 'Cancel',
-        reverseButtons: true
-      }).then((result) => {
-        if (result.isConfirmed) {
-          localStorage.clear();
-          sessionStorage.clear();
-          Swal.fire({
-            title: 'Logged out successfully!',
-            icon: 'success',
-            confirmButtonText: 'OK'
-          }).then(() => {
-            window.location.href = '/oreiro-reden/system-frontend/login.php';
-          });
-        }
+        title: 'Logged out successfully!',
+        icon: 'success',
+        confirmButtonText: 'OK'
+      }).then(() => {
+        window.location.href = '/oreiro-reden/system-frontend/login.php';
       });
-    });
+    }
+  });
+});
 
-    function redirectToProfileManagement() {
-      window.location.href = 'profile.php';
-    }
-    function redirectToStudentDasboard() {
-      window.location.href = 'studentdashboard.php';
-    }
-    function redirectToStudentGrades(){
-      window.location.href = 'studentgrades.php';
-    }
-  </script>
+function redirectToGradesManagement() {
+    window.location.href = 'grade-management.php';
+}
+
+function redirectToUserManagement() {
+    window.location.href = 'user-management.php';
+}
+
+function redirectToProfileManagement() {
+    window.location.href = 'profile.php';
+}
+
+function redirectToReportsManagement() {
+    window.location.href = 'reports-management.php';
+}
+function redirectToStudentManagement() {
+    window.location.href = 'student-management.php';
+}
+function redirectToInstructorManagement() {
+    window.location.href = 'instructor-management.php';
+}
+function redirectToInstructorDashboard(){
+  window.location.href = 'instructordashboard.php';
+}
+
+</script>
+
 </body>
 </html>

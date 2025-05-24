@@ -6,6 +6,7 @@
     <title>Student Dashboard</title>
 </head>
 <body>
-    
+    <?php include 'sidebar.php'; ?>
+    <h1>dashboard</h1>
 </body>
 </html>

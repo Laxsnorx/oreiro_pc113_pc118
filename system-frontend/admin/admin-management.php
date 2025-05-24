@@ -28,11 +28,13 @@
   }
 
   h1 {
-    margin-left: 290px;
-    padding: 20px;
-    font-size: 40px;
-    color: #406ff3;
-  }
+      margin-left: 290px;
+      padding: 25px 20px 20px;
+      font-size: 42px;
+      font-weight: 800;
+      color: #406ff3;
+      text-shadow: 1px 1px 4px rgba(64, 111, 243, 0.4);
+    }
 
   table {
     width: calc(100% - 290px);
@@ -200,9 +202,12 @@ function loadUsers() {
           ${user.file ? `<a href="http://127.0.0.1:8000/storage/${user.file}" target="_blank">Download</a>` : 'No File'}
         </td>
         <td>
-          <button onclick="editUser(${user.id})">Edit</button>
-          <button class="btn-delete" onclick="deleteUser(${user.id})">Delete</button>
-        </td>
+  <div style="display: flex; gap: 5px;">
+    <button onclick="editUser(${user.id})">Edit</button>
+    <button class="btn-delete" onclick="deleteUser(${user.id})">Delete</button>
+  </div>
+</td>
+
       `;
       tbody.appendChild(row);
     });

@@ -107,13 +107,12 @@ class StudentsController extends Controller
     }
 
     public function getGrades($id)
-{
-    // Assuming you have a Grade model with a student_id field
-    $grades = Grade::where('student_id', $id)
-                    ->with('subject') // Assuming 'subject' is a relation on the Grade model
-                    ->get();
-
-    // Return grades as JSON
-    return response()->json($grades);
-}
+    {
+        $grades = Grade::where('student_id', $id)
+                       ->with('subject.instructor') // ✅ include instructor inside subject
+                        ->get();
+    
+        return response()->json($grades);
+    }
+    
 }
