@@ -15,10 +15,13 @@ return new class extends Migration
             $table->id();
             $table->string('name'); // Name of the instructor
             $table->string('email'); // Name of the instructor
+            $table->string('password');
             $table->integer('age'); // Age of the instructor
             $table->string('course'); 
             $table->string('image')->nullable(); // Profile image (optional)
             $table->string('contact_number'); // Contact number
+            $table->enum('role', ['instructor']);
+            $table->foreignId('subject_id')->nullable()->constrained('subjects')->unique();
             $table->timestamps();   
         });
     }

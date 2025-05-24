@@ -15,6 +15,7 @@ class SubjectController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
+            'code' => 'required|string|max:10',
             'name' => 'required|string|max:255',
             'instructor_id' => 'required|exists:instructors,id',
             'year' => 'required|string|max:4',
@@ -34,6 +35,7 @@ class SubjectController extends Controller
     public function update(Request $request, Subject $subject)
     {
         $validated = $request->validate([
+            'code' => 'required|string|max:10',
             'name' => 'required|string|max:255',
             'instructor_id' => 'required|exists:instructors,id',
             'year' => 'required|string|max:4',
@@ -42,7 +44,7 @@ class SubjectController extends Controller
 
         $subject->update($validated);
 
-        return response()->json($subject);
+        return response()->json($subject, 201);
     }
 
     public function destroy(Subject $subject)

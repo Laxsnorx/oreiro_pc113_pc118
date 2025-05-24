@@ -19,9 +19,11 @@ class StudentFactory extends Factory
     {
         return [
             'name' => $this->faker->name(),
-            'age' => $this->faker->numberBetween(1,100),
             'email' => $this->faker->unique()->safeEmail(),
+            'password' => bcrypt('password'),
+            'age' => $this->faker->numberBetween(1,100),
             'course' => $this->faker->jobTitle(),
+            'role' => 'student',
             'created_at' => now(),
             'updated_at' => now(),
         ];

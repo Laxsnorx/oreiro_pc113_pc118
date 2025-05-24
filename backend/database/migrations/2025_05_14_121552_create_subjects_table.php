@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('subjects', function (Blueprint $table) {
             $table->id();
+            $table->string('code');
             $table->string('name'); // Name of the subject
             $table->foreignId('instructor_id')->constrained(); // Foreign key linking to instructors table
             $table->string('year'); // Academic year

@@ -17,7 +17,8 @@ class GradeController extends Controller
         $validated = $request->validate([
             'subject_id' => 'required|exists:subjects,id',
             'student_id' => 'required|exists:students,id',
-            'grade' => 'required|string|max:5',
+            'midterm_grade' => 'nullable|numeric|min:0|max:100',
+            'final_grade' => 'nullable|numeric|min:0|max:100',
         ]);
 
         $grade = Grade::create($validated);
@@ -30,17 +31,17 @@ class GradeController extends Controller
         return response()->json($grade->load(['subject', 'student']));
     }
 
-    public function update(Request $request, Grade $grade)
+    public function update(Request $request, $id)
     {
+        $grade = Grade::findOrFail($id);
         $validated = $request->validate([
-            'subject_id' => 'required|exists:subjects,id',
-            'student_id' => 'required|exists:students,id',
-            'grade' => 'required|string|max:5',
+            'midterm_grade' => 'nullable|numeric|min:0|max:100',
+            'final_grade' => 'nullable|numeric|min:0|max:100',
         ]);
 
         $grade->update($validated);
 
-        return response()->json($grade);
+        return response()->json(['message' => 'Grade updated successfully.']);
     }
 
     public function destroy(Grade $grade)

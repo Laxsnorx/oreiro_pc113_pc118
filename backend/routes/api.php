@@ -1,10 +1,9 @@
 <?php
 //////////////////////////////////////////////////////! PC117 - Application Development & Emerging Technologies Routes
-use App\Http\Controllers\Auth\LauthController; 
+use App\Http\Controllers\LauthController; 
 use App\Http\Controllers\GradeController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\InstructorController;
-
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/dashboard/admin', fn() => response()->json(['message' => 'Admin Dashboard']))->middleware('role:admin');
@@ -30,12 +29,11 @@ Route::delete('/subjects/{id}', [SubjectController::class, 'destroy']);
 Route::get('/instructors', [InstructorController::class, 'index']);
 Route::post('/instructors', [InstructorController::class, 'store']);
 Route::get('/instructors/{id}', [InstructorController::class, 'show']);
-Route::post('/instructors/{id}', [InstructorController::class, 'update']);
+Route::put('/instructors/{id}', [InstructorController::class, 'update']);
 Route::delete('/instructors/{id}', [InstructorController::class, 'destroy']);
 
 
 //////////////////////////////////////////////////////!
-use App\Http\Controllers\HelloController;
 use App\Http\Controllers\UserDashboardController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\StudentsController;
@@ -44,8 +42,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 
-Route::get('/hello', [HelloController::class, 'index']); //!new
-Route::post('/hello', [HelloController::class, 'store']); //!new
 
 
 
@@ -62,7 +58,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 
-Route::post('/login', [UserController::class, 'login']); //!new
+Route::post('/login', [LauthController::class, 'login']); //!new
 Route::get('/students', [StudentsController::class,'index']);
 Route::get('/employees', [EmployeeController::class,'index']);
 // Employees

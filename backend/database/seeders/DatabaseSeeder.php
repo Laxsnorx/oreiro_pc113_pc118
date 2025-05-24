@@ -20,39 +20,66 @@ class DatabaseSeeder extends Seeder
 {
     User::factory(10)->create(); // Optional: Seeding 10 users
 
-    // Create 10 Instructors
-    echo "Seeding Instructors...\n";
-    $instructors = Instructor::factory()->count(10)->create();
+        // Create 10 Instructors
+        echo "Seeding Instructors...\n";
+        $instructors = Instructor::factory()->count(10)->create();
 
-    // Each Instructor has 1 Subject only
-    echo "Seeding Subjects...\n";
-    $instructors->each(function ($instructor) {
-        Subject::factory()->create([
-            'instructor_id' => $instructor->id,
-            'schedule' => 'MWF 9:00 AM - 11:00 AM', // Example schedule
-            'units' => 3, // Ensure 3 units per subject
-        ]);
-    });
+        // Define fixed subject names
+        $subjectNames = [
+            'Reading Visual Arts',
+            'Pagbasa at Pagsulat Tungo sa Pananaliksik',
+            'Networking 2',
+            'Discrete Mathematics',
+            'Object-Oriented Programming',
+            'Data Structure and Algorithm',
+            'Fundamentals of Digital Logic Design',
+            'Human Computer Interaction 2',
+            'Physical Activities Towards Health & Fitness 2',
+            'Graphic Design',
+        ];
 
-    // Create Grades for each Subject and Student
-    echo "Seeding Grades...\n";
-    $students = Student::all();
-    Subject::all()->each(function ($subject) use ($students) {
-        $students->each(function ($student) use ($subject) {
-            Grade::create([
-                'subject_id' => $subject->id,
-                'student_id' => $student->id,
-                'grade' => $this->generateGrade(),
+        // Create subjects with specific names and random grades
+        echo "Seeding Subjects...\n";
+        foreach ($subjectNames as $index => $name) {
+            Subject::create([
+                'code' => 'SUB' . str_pad($index + 1, 2, '0', STR_PAD_LEFT),    
+                'name' => $name,
+                'instructor_id' => $instructors[$index % $instructors->count()]->id,
+                'schedule' => 'MWF 9:00 AM - 11:00 AM',
+                'units' => 3,
+                'year' => $this->generateYear(),
             ]);
-        });
-    });
+        }
 
-    echo "Sample data generated successfully!\n";
+        // Create Grades for each Subject and Student
+        echo "Seeding Grades...\n";
+        $students = Student::all();
+        Subject::all()->each(function ($subject) use ($students) {
+            $students->each(function ($student) use ($subject) {
+                Grade::create([
+                    'subject_id' => $subject->id,
+                    'student_id' => $student->id,
+                    'midterm_grade' => $this->generateGrade(),
+                    'final_grade' => $this->generateGrade(),
+                ]);
+            });
+        });
+
+        echo "Sample data generated successfully!\n";
     }
+
     private function generateGrade()
     {
-    return collect([1.0, 1.25, 1.5, 1.75, 2.0, 2.25, 2.5, 2.75, 3.0, 4.0, 5.0])
-        ->random();
+        return collect([1.0, 1.25, 1.5, 1.75, 2.0, 2.25, 2.5, 2.75, 3.0, 4.0, 5.0])
+            ->random();
+    }
+    public function generateYear(){
+        return collect([
+            '1st Year',
+            '2nd Year',
+            '3rd Year',
+            '4th Year',
+        ])->random();
     }
 }
 
