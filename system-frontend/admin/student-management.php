@@ -207,7 +207,7 @@
     function fetchStudents() {
       const token = localStorage.getItem("token");
 
-      fetch("http://127.0.0.1:8000/api/students", {
+      fetch("https://rgradebackend.bdedal.online/api/students", {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -296,7 +296,7 @@
     if (result.isConfirmed) {
       const token = localStorage.getItem('token');
 
-      fetch("http://127.0.0.1:8000/api/students", {
+      fetch("https://rgradebackend.bdedal.online/api/students", {
         method: "POST",
         headers: {
           'Content-Type': 'application/json',
@@ -352,7 +352,7 @@ function editStudent(id) {
     if (result.isConfirmed) {
       const updatedData = result.value;
 
-      fetch(`http://127.0.0.1:8000/api/students/${id}`, {
+      fetch(`https://rgradebackend.bdedal.online/api/students/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -388,7 +388,7 @@ function editStudent(id) {
         confirmButtonText: "Yes, delete it!"
       }).then(result => {
         if (result.isConfirmed) {
-          fetch(`http://127.0.0.1:8000/api/students/${id}`, {
+          fetch(`https://rgradebackend.bdedal.online/api/students/${id}`, {
             method: "DELETE",
             headers: {
               Authorization: `Bearer ${token}`
