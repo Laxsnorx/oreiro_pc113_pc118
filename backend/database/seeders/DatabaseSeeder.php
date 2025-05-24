@@ -40,10 +40,10 @@ class DatabaseSeeder extends Seeder
 
         // Create subjects with specific names and random grades
         echo "Seeding Subjects...\n";
-        foreach ($subjectNames as $index => $name) {
+        foreach ($subjectNames as $index => $description) {
             Subject::create([
                 'code' => 'SUB' . str_pad($index + 1, 2, '0', STR_PAD_LEFT),    
-                'name' => $name,
+                'description' => $description,
                 'instructor_id' => $instructors[$index % $instructors->count()]->id,
                 'schedule' => 'MWF 9:00 AM - 11:00 AM',
                 'units' => 3,

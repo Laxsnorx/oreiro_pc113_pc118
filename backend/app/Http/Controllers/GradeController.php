@@ -49,4 +49,21 @@ class GradeController extends Controller
         $grade->delete();
         return response()->json(['message' => 'Grade deleted']);
     }
+
+    public function getGradesByStudent($id)
+{
+    try {
+        $grades = Grade::where('student_id', $id)->get();
+
+        if ($grades->isEmpty()) {
+            return response()->json(['message' => 'No grades found for the student'], 404);
+        }
+
+        return response()->json($grades);
+    } catch (\Exception $e) {
+        return response()->json(['error' => $e->getMessage()], 500);
+    }
+}
+
+
 }

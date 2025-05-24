@@ -100,7 +100,9 @@ Route::middleware('auth:sanctum')->post('/logout', function (Request $request) {
         Route::put('/students/{id}', [StudentsController::class, 'update']);
         Route::get('/students/{id}', [StudentsController::class,'show']);
         Route::delete('/students/{id}', [StudentsController::class, 'destroy']);
-        Route::get('/students/{id}/grades', [StudentsController::class, 'getGrades']);
+        Route::get('/students/{id}/grades', [GradeController::class, 'getGradesByStudent']);
+
+        
 
 
         Route::post('/employees', [EmployeeController::class,'store']);

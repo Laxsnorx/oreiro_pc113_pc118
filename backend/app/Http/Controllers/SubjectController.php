@@ -16,7 +16,7 @@ class SubjectController extends Controller
     {
         $validated = $request->validate([
             'code' => 'required|string|max:10',
-            'name' => 'required|string|max:255',
+            'description' => 'required|string|max:255',
             'instructor_id' => 'required|exists:instructors,id',
             'year' => 'required|string|max:4',
             'units' => 'required|integer|min:1',  // added units validation
@@ -36,7 +36,7 @@ class SubjectController extends Controller
     {
         $validated = $request->validate([
             'code' => 'required|string|max:10',
-            'name' => 'required|string|max:255',
+            'description' => 'required|string|max:255',
             'instructor_id' => 'required|exists:instructors,id',
             'year' => 'required|string|max:4',
             'units' => 'required|integer|min:1',  // added units validation

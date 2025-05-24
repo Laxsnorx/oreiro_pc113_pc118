@@ -5,6 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Instructor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\CredentialMail;
+use Illuminate\Support\Facades\Hash;
+use Exception;
 
 class InstructorController extends Controller
 {
@@ -17,42 +21,61 @@ class InstructorController extends Controller
                 $instructor->image_url = $instructor->image ? asset('storage/' . $instructor->image) : null;
             }
 
-            return response()->json($instructors);
-        } catch (\Exception $e) {
-            return response()->json(['error' => 'Failed to fetch instructors', 'message' => $e->getMessage()], 500);
+            return response()->json($instructors, 200);
+        } catch (Exception $e) {
+            return response()->json([
+                'message' => 'Error fetching instructors',
+                'error' => $e->getMessage(),
+            ], 500);
         }
     }
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:instructors,email',
-            'password' => 'required|string|min:8|max:255',
-            'age' => 'required|integer|min:18|max:100',
-            'course' => 'required|string|max:255',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'contact_number' => 'required|string|max:20',
-            'subject_id' => 'required|exists:subjects,id|unique:instructors,subject_id',
-
-        ]);
-
         try {
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|email|max:255|unique:instructors,email',
+                'password' => 'required|string|min:8|max:255',
+                'age' => 'required|integer|min:18|max:100',
+                'course' => 'required|string|max:255',
+                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+                'contact_number' => 'required|string|max:20',
+                'subject_id' => 'required|exists:subjects,id|unique:instructors,subject_id',
+            ]);
+
             if ($request->hasFile('image')) {
-                $validated['image'] = $request->file('image')->store('instructors', 'public');
+                $path = $request->file('image')->store('instructors', 'public');
+                $validated['image'] = $path;
             }
-            $validated['password'] = bcrypt($validated['password']);
-            $validated['subject_id'] = $request->input('subject_id');
+
+            $validated['password'] = Hash::make($validated['password']);
 
             $instructor = Instructor::create($validated);
-
-            // Reload instructor with subject relation
             $instructor = Instructor::with('subjects')->find($instructor->id);
             $instructor->image_url = $instructor->image ? asset('storage/' . $instructor->image) : null;
 
-            return response()->json($instructor, 201);
-        } catch (\Exception $e) {
-            return response()->json(['error' => 'Failed to create instructor', 'message' => $e->getMessage()], 500);
+            $subjects = $instructor->subjects;
+$deadline = '2025-06-30';
+
+Mail::to($instructor->email)->send(new InstructorMail([
+    'full_name' => $instructor->name,
+    'subjects' => $subjects,
+    'deadline' => $deadline,
+    'instructor_id' => $instructor->id,
+]));
+
+            
+
+            return response()->json([
+                'message' => 'Instructor created successfully',
+                'instructor' => $instructor
+            ], 201);
+        } catch (Exception $e) {
+            return response()->json([
+                'message' => 'Error creating instructor',
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
 
@@ -62,64 +85,59 @@ class InstructorController extends Controller
             $instructor = Instructor::with('subjects')->findOrFail($id);
             $instructor->image_url = $instructor->image ? asset('storage/' . $instructor->image) : null;
 
-            return response()->json($instructor);
-        } catch (\Exception $e) {
-            return response()->json(['error' => 'Instructor not found', 'message' => $e->getMessage()], 404);
+            return response()->json($instructor, 200);
+        } catch (Exception $e) {
+            return response()->json([
+                'message' => 'Instructor not found',
+                'error' => $e->getMessage(),
+            ], 404);
         }
     }
 
     public function update(Request $request, $id)
-{
-    try {
-        $instructor = Instructor::findOrFail($id);
+    {
+        try {
+            $instructor = Instructor::findOrFail($id);
 
-        // Validation rules
-        $validated = $request->validate([
-            'name' => 'string|max:255',
-            'email' => 'email|max:255|unique:instructors,email,' . $instructor->id,
-            'password' => 'nullable|string|min:8|max:255',
-            'age' => 'integer|min:18|max:100',
-            'course' => 'string|max:255',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'contact_number' => 'string|max:20',
-            'subject_id' => 'exists:subjects,id|unique:instructors,subject_id,' . $instructor->id,
-            'role' => 'string|max:255',  // Fixed the key from 'role ' to 'role'
-        ]);
+            $validated = $request->validate([
+                'name' => 'nullable|string|max:255',
+                'email' => 'nullable|email|max:255|unique:instructors,email,' . $instructor->id,
+                'password' => 'nullable|string|min:8|max:255',
+                'age' => 'nullable|integer|min:18|max:100',
+                'course' => 'nullable|string|max:255',
+                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+                'contact_number' => 'nullable|string|max:20',
+                'subject_id' => 'nullable|exists:subjects,id|unique:instructors,subject_id,' . $instructor->id,
+            ]);
 
-        // Handle image file upload if present
-        if ($request->hasFile('image')) {
-            // Delete old image if exists
-            if ($instructor->image) {
-                Storage::disk('public')->delete($instructor->image);
+            if ($request->hasFile('image')) {
+                if ($instructor->image) {
+                    Storage::disk('public')->delete($instructor->image);
+                }
+                $validated['image'] = $request->file('image')->store('instructors', 'public');
             }
-            $validated['image'] = $request->file('image')->store('instructors', 'public');
+
+            if (!empty($validated['password'])) {
+                $validated['password'] = Hash::make($validated['password']);
+            } else {
+                unset($validated['password']);
+            }
+
+            $instructor->update($validated);
+            $instructor = Instructor::with('subjects')->find($instructor->id);
+            $instructor->image_url = $instructor->image ? asset('storage/' . $instructor->image) : null;
+
+            return response()->json([
+                'message' => 'Instructor updated successfully',
+                'instructor' => $instructor
+            ], 200);
+        } catch (Exception $e) {
+            return response()->json([
+                'message' => 'Error updating instructor',
+                'error' => $e->getMessage(),
+            ], 500);
         }
-
-        // Hash password only if provided
-        if (!empty($validated['password'])) {
-            $validated['password'] = bcrypt($validated['password']);
-        } else {
-            unset($validated['password']);
-        }
-
-        // Update instructor with validated data
-        $instructor->update($validated);
-
-        // Reload instructor with subjects relation and add image URL
-        $instructor = Instructor::with('subjects')->find($instructor->id);
-        $instructor->image_url = $instructor->image ? asset('storage/' . $instructor->image) : null;
-
-        return response()->json($instructor);
-    } catch (\Exception $e) {
-        \Log::error('Instructor update failed: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
-        return response()->json([
-            'error' => 'Failed to update instructor',
-            'message' => $e->getMessage(),
-            'trace' => $e->getTraceAsString(),
-        ], 500);
     }
-}
-
 
     public function destroy($id)
     {
@@ -132,9 +150,14 @@ class InstructorController extends Controller
 
             $instructor->delete();
 
-            return response()->json(['message' => 'Instructor deleted successfully']);
-        } catch (\Exception $e) {
-            return response()->json(['error' => 'Failed to delete instructor', 'message' => $e->getMessage()], 500);
+            return response()->json([
+                'message' => 'Instructor deleted successfully',
+            ], 200);
+        } catch (Exception $e) {
+            return response()->json([
+                'message' => 'Error deleting instructor',
+                'error' => $e->getMessage(),
+            ], 500);
         }
     }
 }

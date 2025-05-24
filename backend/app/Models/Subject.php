@@ -9,7 +9,7 @@ class Subject extends Model
 {
     /** @use HasFactory<\Database\Factories\SubjectFactory> */
     use HasFactory;
-    protected $fillable = ['code', 'name', 'year', 'units', 'instructor_id'];
+    protected $fillable = ['code', 'description', 'year', 'units', 'instructor_id'];
     public function instructor()
     {
         return $this->belongsTo(Instructor::class);
