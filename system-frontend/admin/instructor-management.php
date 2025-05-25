@@ -195,10 +195,10 @@
 
     function fetchInstructors() {
   Promise.all([
-    fetch("https://rgradebackend.bdedal.online/api/instructors", {
+    fetch("http://127.0.0.1:8000/api/instructors", {
       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
     }).then(res => res.json()),
-    fetch("https://rgradebackend.bdedal.online/api/subjects", {
+    fetch("http://127.0.0.1:8000/api/subjects", {
       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
     }).then(res => res.json())
   ])
@@ -237,7 +237,7 @@ function displayInstructors() {
     const row = document.createElement("tr");
     row.innerHTML = `
       <td>${ins.id}</td>
-      <td>${ins.image ? `<img src="https://rgradebackend.bdedal.online/storage/${ins.image}" width="50" style="border-radius: 8px;">` : 'N/A'}</td>
+      <td>${ins.image ? `<img src="http://127.0.0.1:8000/storage/${ins.image}" width="50" style="border-radius: 8px;">` : 'N/A'}</td>
       <td>${ins.name}</td>
       <td>${ins.email || 'N/A'}</td>
       <td>${ins.age}</td>
@@ -272,20 +272,33 @@ function displayInstructors() {
       }
     }
 
-    function filterInstructors() {
-      const term = document.getElementById("searchInput").value.toLowerCase();
-      filteredInstructors = allInstructors.filter(i =>
-        i.name.toLowerCase().includes(term) ||
-        i.course.toLowerCase().includes(term) ||
-        (i.email && i.email.toLowerCase().includes(term)) ||
-        (i.role && i.role.toLowerCase().includes(term))
-      );
-      currentPage = 1;
-      displayInstructors();
-    }
+    function fetchInstructors() {
+  Promise.all([
+    fetch("http://127.0.0.1:8000/api/instructors", {
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+    }).then(res => res.json()),
+    fetch("http://127.0.0.1:8000/api/subjects", {
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+    }).then(res => res.json())
+  ])
+  .then(([instructorsData, subjectsData]) => {
+    // Attach subject to instructors for easy access
+    instructorsData.forEach(instr => {
+      instr.subject = subjectsData.find(s => s.instructor_id === instr.id) || null;
+    });
+    allInstructors = filteredInstructors = instructorsData;
+    allSubjects = subjectsData;
+    displayInstructors();
+  });
+}
 
 
-    function createInstructor() { 
+    function getAvailableSubjects(currentSubjectId = null) {
+  // Subjects not assigned or assigned to current instructor
+  return allSubjects.filter(s => !s.instructor_id || s.instructor_id === currentSubjectId);
+}
+
+function createInstructor() { 
   const availableSubjects = getAvailableSubjects();
   const subjectOptions = availableSubjects.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
 
@@ -307,23 +320,25 @@ function displayInstructors() {
     `,
     showCancelButton: true,
     confirmButtonText: 'Create',
+    focusConfirm: false,  // So the confirm button is not auto-focused
     preConfirm: () => {
-      const name = Swal.getPopup().querySelector('#name').value.trim();
-      const email = Swal.getPopup().querySelector('#email').value.trim();
-      const password = Swal.getPopup().querySelector('#password').value.trim();
-      const age = Swal.getPopup().querySelector('#age').value.trim();
-      const course = Swal.getPopup().querySelector('#course').value.trim();
-      const contact = Swal.getPopup().querySelector('#contact').value.trim();
-      const imageInput = Swal.getPopup().querySelector('#image');
-      const role = Swal.getPopup().querySelector('#role').value;
-      const subjectId = Swal.getPopup().querySelector('#subject').value;
+      const popup = Swal.getPopup();
+      const name = popup.querySelector('#name').value.trim();
+      const email = popup.querySelector('#email').value.trim();
+      const password = popup.querySelector('#password').value.trim();
+      const age = popup.querySelector('#age').value.trim();
+      const course = popup.querySelector('#course').value.trim();
+      const contact = popup.querySelector('#contact').value.trim();
+      const imageInput = popup.querySelector('#image');
+      const role = popup.querySelector('#role').value;
+      const subjectId = popup.querySelector('#subject').value;
 
+      // Validation
       if (!name || !email || !password || !age || !course || !contact) {
         Swal.showValidationMessage('All fields except image and subject are required');
-        return false;
+        return false; // stop submission
       }
 
-      // Additional client-side check: Prevent assigning already assigned subject (extra safety)
       if (subjectId) {
         if (!availableSubjects.find(s => s.id == subjectId)) {
           Swal.showValidationMessage('Selected subject is already assigned to another instructor.');
@@ -331,6 +346,7 @@ function displayInstructors() {
         }
       }
 
+      // Build FormData for POST
       const formData = new FormData();
       formData.append("name", name);
       formData.append("email", email);
@@ -339,31 +355,39 @@ function displayInstructors() {
       formData.append("course", course);
       formData.append("contact_number", contact);
       formData.append("role", role);
-      formData.append("subject_id", subjectId || '');
+      if (subjectId) formData.append("subject_id", subjectId);
 
       if (imageInput.files.length > 0) {
         formData.append("image", imageInput.files[0]);
       }
 
-      return formData;
+      return formData; // returned to then() below
     }
   }).then(result => {
     if (result.isConfirmed) {
-      fetch("https://rgradebackend.bdedal.online/api/instructors", {
+      fetch("http://127.0.0.1:8000/api/instructors", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`
-          // Don't set Content-Type when sending FormData!
+          // DO NOT set Content-Type here when sending FormData!
         },
         body: result.value
       })
-      .then(res => {
-        if (!res.ok) throw new Error("Failed to create instructor");
+      .then(async res => {
+        if (!res.ok) {
+          // Try to get detailed error message from response JSON
+          let errMsg = "Failed to create instructor";
+          try {
+            const errorData = await res.json();
+            if (errorData.message) errMsg = errorData.message;
+          } catch {}
+          throw new Error(errMsg);
+        }
         return res.json();
       })
       .then(data => {
         Swal.fire('Success', 'Instructor created successfully', 'success');
-        fetchInstructors(); // refresh list
+        fetchInstructors(); // Refresh the list
       })
       .catch(err => {
         Swal.fire('Error', err.message, 'error');
@@ -372,6 +396,9 @@ function displayInstructors() {
   });
 }
 
+
+
+
 function editInstructor(id) {
   const instructor = allInstructors.find(ins => ins.id === id);
   if (!instructor) {
@@ -379,16 +406,13 @@ function editInstructor(id) {
     return;
   }
 
-  // Pass current instructor's subject id to exclude it from assigned subjects blocking
   const availableSubjects = getAvailableSubjects(instructor.subject ? instructor.subject.id : null);
 
-  // Include current subject even if assigned (for edit convenience)
   if (instructor.subject && !availableSubjects.some(s => s.id === instructor.subject.id)) {
     availableSubjects.push(instructor.subject);
   }
 
-  // Sort to keep dropdown nice (optional)
-  availableSubjects.sort((a,b) => a.name.localeCompare(b.name));
+  availableSubjects.sort((a, b) => a.name.localeCompare(b.name));
 
   const subjectOptions = availableSubjects.map(s =>
     `<option value="${s.id}" ${instructor.subject && instructor.subject.id === s.id ? 'selected' : ''}>${s.name}</option>`
@@ -397,12 +421,12 @@ function editInstructor(id) {
   Swal.fire({
     title: 'Edit Instructor',
     html: `
-      <input id="name" class="swal2-input" value="${instructor.name}" autocomplete="off">
-      <input id="email" class="swal2-input" type="email" value="${instructor.email}" autocomplete="off">
-      <input id="password" class="swal2-input" placeholder="Enter new password if changing" autocomplete="new-password">
-      <input id="age" class="swal2-input" type="number" value="${instructor.age}" min="18" max="100" autocomplete="off">
-      <input id="course" class="swal2-input" value="${instructor.course}" autocomplete="off">
-      <input id="contact" class="swal2-input" value="${instructor.contact_number}" autocomplete="off">
+      <input id="name" class="swal2-input" value="${instructor.name}" autocomplete="off" placeholder="Name">
+      <input id="email" class="swal2-input" type="email" value="${instructor.email}" autocomplete="off" placeholder="Email">
+      <input id="password" class="swal2-input" placeholder="Enter new password if changing" autocomplete="new-password" type="password">
+      <input id="age" class="swal2-input" type="number" value="${instructor.age}" min="18" max="100" autocomplete="off" placeholder="Age">
+      <input id="course" class="swal2-input" value="${instructor.course}" autocomplete="off" placeholder="Course">
+      <input id="contact" class="swal2-input" value="${instructor.contact_number}" autocomplete="off" placeholder="Contact Number">
       <input id="image" type="file" accept="image/*" style="width:100%; margin: 0 auto 8px; display: block;">
       <select id="subject" class="swal2-input">
         <option value="">-- Unassigned --</option>
@@ -422,16 +446,8 @@ function editInstructor(id) {
       const subjectId = Swal.getPopup().querySelector('#subject').value;
 
       if (!name || !email || !age || !course || !contact) {
-        Swal.showValidationMessage('All fields except password, image, and subject are required');
+        Swal.showValidationMessage('Please fill all required fields');
         return false;
-      }
-
-      // Validate subject not assigned elsewhere (except current)
-      if (subjectId) {
-        if (!availableSubjects.find(s => s.id == subjectId)) {
-          Swal.showValidationMessage('Selected subject is already assigned to another instructor.');
-          return false;
-        }
       }
 
       const formData = new FormData();
@@ -441,26 +457,21 @@ function editInstructor(id) {
       formData.append("age", age);
       formData.append("course", course);
       formData.append("contact_number", contact);
-
-      // Append subject_id even if empty (to allow unassign)
-      formData.append("subject_id", subjectId);
+      formData.append("subject_id", subjectId || '');
 
       if (imageInput.files.length > 0) {
         formData.append("image", imageInput.files[0]);
       }
 
-      // Method spoofing for Laravel PUT
-      formData.append('_method', 'PUT');
-
       return formData;
     }
   }).then(result => {
     if (result.isConfirmed) {
-      fetch(`https://rgradebackend.bdedal.online/api/instructors/${id}`, {
-        method: "POST",
+      fetch(`http://127.0.0.1:8000/api/instructors/${id}`, {
+        method: "POST", // or PUT, depending on your API
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`
-          // Don't set Content-Type for FormData
+          // Don't set Content-Type here!
         },
         body: result.value
       })
@@ -470,7 +481,7 @@ function editInstructor(id) {
       })
       .then(data => {
         Swal.fire('Success', 'Instructor updated successfully', 'success');
-        fetchInstructors(); // refresh list
+        fetchInstructors();
       })
       .catch(err => {
         Swal.fire('Error', err.message, 'error');
@@ -478,6 +489,9 @@ function editInstructor(id) {
     }
   });
 }
+
+
+
 
     function deleteInstructor(id) {
       Swal.fire({
@@ -489,7 +503,7 @@ function editInstructor(id) {
         cancelButtonText: 'Cancel'
       }).then(result => {
         if (result.isConfirmed) {
-          fetch(`https://rgradebackend.bdedal.online/api/instructors/${id}`, {
+          fetch(`http://127.0.0.1:8000/api/instructors/${id}`, {
             method: "DELETE",
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`
@@ -512,7 +526,7 @@ function editInstructor(id) {
   Swal.fire({
     title: `<span style="font-size: 1.3rem; font-weight: 600; color: #333;">${ins.name}</span>`,
     html: `
-      ${ins.image ? `<img src="https://rgradebackend.bdedal.online/storage/${ins.image}" 
+      ${ins.image ? `<img src="http://127.0.0.1:8000/storage/${ins.image}" 
         style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; margin-bottom: 15px; border: 2px solid #406ff3;">` : ''}
       <div style="text-align: left; font-size: 1rem; color: #555; line-height: 1.5;">
         <p><strong style="color: #406ff3;">Email:</strong> ${ins.email || 'N/A'}</p>

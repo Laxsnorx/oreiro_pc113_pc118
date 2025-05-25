@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+use App\Models\User;
 
 use App\Models\Instructor;
 use Illuminate\Http\Request;
@@ -31,53 +32,48 @@ class InstructorController extends Controller
     }
 
     public function store(Request $request)
-    {
-        try {
-            $validated = $request->validate([
-                'name' => 'required|string|max:255',
-                'email' => 'required|email|max:255|unique:instructors,email',
-                'password' => 'required|string|min:8|max:255',
-                'age' => 'required|integer|min:18|max:100',
-                'course' => 'required|string|max:255',
-                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-                'contact_number' => 'required|string|max:20',
-                'subject_id' => 'required|exists:subjects,id|unique:instructors,subject_id',
-            ]);
+{
+    $validated = $request->validate([
+        'name' => 'required|string|max:255',
+        'email' => 'required|email|unique:instructors,email',
+        'password' => 'required|string|min:6',
+        'age' => 'required|integer|min:18|max:100',
+        'course' => 'required|string',
+        'contact_number' => 'required|string',
+        'role' => 'required|string',
+        'subject_id' => 'nullable|exists:subjects,id',
+        'image' => 'nullable|image|max:2048',
+    ]);
 
-            if ($request->hasFile('image')) {
-                $path = $request->file('image')->store('instructors', 'public');
-                $validated['image'] = $path;
-            }
+    // Handle image upload
+    if ($request->hasFile('image')) {
+        $imagePath = $request->file('image')->store('images', 'public');
+        $validated['image'] = $imagePath;
+    }
 
-            $validated['password'] = Hash::make($validated['password']);
+    $validated['password'] = bcrypt($validated['password']); // hash password
+// Mail::to($instructor->email)->send(new InstructorMail([
+            //     'full_name' => $instructor->full_name,
+            //     'subjects' => $subjects,
+            //     'deadline' => $deadline,
+            //     'instructor_id' => $instructor->id,
+            // ]));
+    $instructor = Instructor::create($validated);
 
-            $instructor = Instructor::create($validated);
-            $instructor = Instructor::with('subjects')->find($instructor->id);
-            $instructor->image_url = $instructor->image ? asset('storage/' . $instructor->image) : null;
-
-            $subjects = $instructor->subjects;
-$deadline = '2025-06-30';
-
-Mail::to($instructor->email)->send(new InstructorMail([
-    'full_name' => $instructor->name,
-    'subjects' => $subjects,
-    'deadline' => $deadline,
-    'instructor_id' => $instructor->id,
-]));
-
-            
-
-            return response()->json([
-                'message' => 'Instructor created successfully',
-                'instructor' => $instructor
-            ], 201);
-        } catch (Exception $e) {
-            return response()->json([
-                'message' => 'Error creating instructor',
-                'error' => $e->getMessage()
-            ], 500);
+    // Possibly update subject to assign instructor_id if subject_id given
+    if (!empty($validated['subject_id'])) {
+        $subject = Subject::find($validated['subject_id']);
+        if ($subject) {
+            $subject->instructor_id = $instructor->id;
+            $subject->save();
         }
     }
+
+    return response()->json($instructor, 201);
+}
+
+
+
 
     public function show($id)
     {

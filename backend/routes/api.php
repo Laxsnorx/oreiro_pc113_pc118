@@ -29,7 +29,7 @@ Route::delete('/subjects/{id}', [SubjectController::class, 'destroy']);
 Route::get('/instructors', [InstructorController::class, 'index']);
 Route::post('/instructors', [InstructorController::class, 'store']);
 Route::get('/instructors/{id}', [InstructorController::class, 'show']);
-Route::put('/instructors/{id}', [InstructorController::class, 'update']);
+Route::post('/instructors/{id}', [InstructorController::class, 'update']);
 Route::delete('/instructors/{id}', [InstructorController::class, 'destroy']);
 
 

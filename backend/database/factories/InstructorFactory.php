@@ -1,6 +1,7 @@
 <?php
 
 namespace Database\Factories;
+use App\Models\Subject;
 
 use App\Models\Instructor;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -28,6 +29,7 @@ class InstructorFactory extends Factory
             'image' => $this->faker->imageUrl(300, 300, 'people'), // Random image URL
             'contact_number' => $this->faker->phoneNumber, // Random phone number
             'role' => 'instructor', // Default role
+            'subject_id' => Subject::inRandomOrder()->first()?->id ?? 1, 
         ];
     }
 }

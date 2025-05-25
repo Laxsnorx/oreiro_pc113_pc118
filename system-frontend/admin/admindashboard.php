@@ -246,7 +246,7 @@
 
   async function fetchLatestStudent() {
     try {
-      const res = await fetch("https://rgradebackend.bdedal.online/api/students?sort=latest", {
+      const res = await fetch("http://127.0.0.1:8000/api/students?sort=latest", {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error("Failed to fetch latest student");
@@ -261,9 +261,9 @@
 
   async function updateCounts() {
     const [users, instructors, students, latestStudentName] = await Promise.all([
-      fetchCount("https://rgradebackend.bdedal.online/api/user"),
-      fetchCount("https://rgradebackend.bdedal.online/api/instructors"),
-      fetchCount("https://rgradebackend.bdedal.online/api/students"),
+      fetchCount("http://127.0.0.1:8000/api/user"),
+      fetchCount("http://127.0.0.1:8000/api/instructors"),
+      fetchCount("http://127.0.0.1:8000/api/students"),
       fetchLatestStudent()
     ]);
 

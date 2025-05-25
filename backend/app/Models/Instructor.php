@@ -20,8 +20,8 @@ class Instructor extends Authenticatable
         'course',
         'image',
         'contact_number',
-        'role'
-
+        'role',
+        'subject_id' // Foreign key to link with subjects
     ];
 
     public function subjects()

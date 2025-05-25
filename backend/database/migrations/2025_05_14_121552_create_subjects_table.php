@@ -14,13 +14,14 @@ return new class extends Migration
         Schema::create('subjects', function (Blueprint $table) {
             $table->id();
             $table->string('code');
-            $table->string('description'); // Name of the subject
-            $table->foreignId('instructor_id'); // Foreign key linking to instructors table
-            $table->string('year'); // Academic year
-            $table->string('schedule'); // Schedule of the subject (e.g., "MWF 10:00 AM - 12:00 PM")
-            $table->integer('units'); // Added units field
+            $table->string('description');
+            $table->foreignId('instructor_id')->constrained()->onDelete('cascade');
+            $table->string('year');
+            $table->string('schedule');
+            $table->integer('units');
             $table->timestamps();
         });
+        
     }
 
     /**

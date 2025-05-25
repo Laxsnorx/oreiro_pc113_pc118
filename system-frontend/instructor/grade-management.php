@@ -212,7 +212,7 @@ document.addEventListener("DOMContentLoaded", function () {
 function fetchStudents() {
   const token = localStorage.getItem("token");
 
-  fetch("https://rgradebackend.bdedal.online/api/students", {
+  fetch("http://127.0.0.1:8000/api/students", {
     headers: {
       Authorization: `Bearer ${token}`
     }
@@ -276,14 +276,14 @@ function renderPaginationControls() {
 function viewGrades(studentId) { 
   const token = localStorage.getItem("token");
 
-  fetch(`https://rgradebackend.bdedal.online/api/students/${studentId}`, {
+  fetch(`http://127.0.0.1:8000/api/students/${studentId}`, {
     headers: {
       Authorization: `Bearer ${token}`
     }
   })
   .then(res => res.json())
   .then(student => {
-    fetch(`https://rgradebackend.bdedal.online/api/students/${studentId}/grades`, {
+    fetch(`http://127.0.0.1:8000/api/students/${studentId}/grades`, {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -363,7 +363,7 @@ function viewGrades(studentId) {
 function editGrades(studentId) {
   const token = localStorage.getItem("token");
 
-  fetch(`https://rgradebackend.bdedal.online/api/students/${studentId}/grades`, {
+  fetch(`http://127.0.0.1:8000/api/students/${studentId}/grades`, {
     headers: {
       Authorization: `Bearer ${token}`
     }
@@ -436,7 +436,7 @@ function editGrades(studentId) {
       }).then(result => {
         if (result.isConfirmed) {
           const updateRequests = Object.entries(result.value).map(([id, updated]) => {
-            return fetch(`https://rgradebackend.bdedal.online/api/grades/${id}`, {
+            return fetch(`http://127.0.0.1:8000/api/grades/${id}`, {
               method: "PUT",
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -472,7 +472,7 @@ function deleteStudent(id) {
         confirmButtonText: "Yes, delete it!"
       }).then(result => {
         if (result.isConfirmed) {
-          fetch(`https://rgradebackend.bdedal.online/api/students/${id}`, {
+          fetch(`http://127.0.0.1:8000/api/students/${id}`, {
             method: "DELETE",
             headers: {
               Authorization: `Bearer ${token}`

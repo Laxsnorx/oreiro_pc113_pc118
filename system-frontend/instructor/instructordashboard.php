@@ -216,7 +216,7 @@
 
       async function fetchActiveStudents() {
         try {
-          const res = await fetch("https://rgradebackend.bdedal.online/api/students?status=active", {
+          const res = await fetch("http://127.0.0.1:8000/api/students?status=active", {
             headers: { Authorization: `Bearer ${token}` },
           });
           if (!res.ok) throw new Error("Failed to fetch active students");
@@ -229,7 +229,7 @@
 
       async function fetchAdminReports() {
         try {
-          const res = await fetch("https://rgradebackend.bdedal.online/api/admin-reports", {
+          const res = await fetch("http://127.0.0.1:8000/api/admin-reports", {
             headers: { Authorization: `Bearer ${token}` },
           });
           if (!res.ok) throw new Error("Failed to fetch admin reports");
