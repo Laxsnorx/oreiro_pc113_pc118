@@ -195,10 +195,10 @@
 
     function fetchInstructors() {
   Promise.all([
-    fetch("http://127.0.0.1:8000/api/instructors", {
+    fetch("https://rgradebackend.bdedal.online/api/instructors", {
       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
     }).then(res => res.json()),
-    fetch("http://127.0.0.1:8000/api/subjects", {
+    fetch("https://rgradebackend.bdedal.online/api/subjects", {
       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
     }).then(res => res.json())
   ])
@@ -237,7 +237,7 @@ function displayInstructors() {
     const row = document.createElement("tr");
     row.innerHTML = `
       <td>${ins.id}</td>
-      <td>${ins.image ? `<img src="http://127.0.0.1:8000/storage/${ins.image}" width="50" style="border-radius: 8px;">` : 'N/A'}</td>
+      <td>${ins.image ? `<img src="https://rgradebackend.bdedal.online/storage/${ins.image}" width="50" style="border-radius: 8px;">` : 'N/A'}</td>
       <td>${ins.name}</td>
       <td>${ins.email || 'N/A'}</td>
       <td>${ins.age}</td>
@@ -274,10 +274,10 @@ function displayInstructors() {
 
     function fetchInstructors() {
   Promise.all([
-    fetch("http://127.0.0.1:8000/api/instructors", {
+    fetch("https://rgradebackend.bdedal.online/api/instructors", {
       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
     }).then(res => res.json()),
-    fetch("http://127.0.0.1:8000/api/subjects", {
+    fetch("https://rgradebackend.bdedal.online/api/subjects", {
       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
     }).then(res => res.json())
   ])
@@ -365,7 +365,7 @@ function createInstructor() {
     }
   }).then(result => {
     if (result.isConfirmed) {
-      fetch("http://127.0.0.1:8000/api/instructors", {
+      fetch("https://rgradebackend.bdedal.online/api/instructors", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`
@@ -467,7 +467,7 @@ function editInstructor(id) {
     }
   }).then(result => {
     if (result.isConfirmed) {
-      fetch(`http://127.0.0.1:8000/api/instructors/${id}`, {
+      fetch(`https://rgradebackend.bdedal.online/api/instructors/${id}`, {
         method: "POST", // or PUT, depending on your API
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`
@@ -503,7 +503,7 @@ function editInstructor(id) {
         cancelButtonText: 'Cancel'
       }).then(result => {
         if (result.isConfirmed) {
-          fetch(`http://127.0.0.1:8000/api/instructors/${id}`, {
+          fetch(`https://rgradebackend.bdedal.online/api/instructors/${id}`, {
             method: "DELETE",
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`
@@ -526,7 +526,7 @@ function editInstructor(id) {
   Swal.fire({
     title: `<span style="font-size: 1.3rem; font-weight: 600; color: #333;">${ins.name}</span>`,
     html: `
-      ${ins.image ? `<img src="http://127.0.0.1:8000/storage/${ins.image}" 
+      ${ins.image ? `<img src="https://rgradebackend.bdedal.online/storage/${ins.image}" 
         style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; margin-bottom: 15px; border: 2px solid #406ff3;">` : ''}
       <div style="text-align: left; font-size: 1rem; color: #555; line-height: 1.5;">
         <p><strong style="color: #406ff3;">Email:</strong> ${ins.email || 'N/A'}</p>

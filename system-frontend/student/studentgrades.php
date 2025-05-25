@@ -217,13 +217,13 @@
       const studentId = currentUser.id;
 
       const [gradesRes, subjectsRes, instructorsRes] = await Promise.all([
-        fetch(`http://127.0.0.1:8000/api/students/${studentId}/grades`, {
+        fetch(`https://rgradebackend.bdedal.online/api/students/${studentId}/grades`, {
           headers: { Authorization: `Bearer ${token}` }
         }),
-        fetch('http://127.0.0.1:8000/api/subjects', {
+        fetch('https://rgradebackend.bdedal.online/api/subjects', {
           headers: { Authorization: `Bearer ${token}` }
         }),
-        fetch('http://127.0.0.1:8000/api/instructors', {
+        fetch('https://rgradebackend.bdedal.online/api/instructors', {
           headers: { Authorization: `Bearer ${token}` }
         }),
       ]);
