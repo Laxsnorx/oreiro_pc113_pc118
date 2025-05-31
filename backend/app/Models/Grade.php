@@ -20,13 +20,13 @@ class Grade extends Model
     {
         return $this->belongsTo(Student::class); // Make sure Student model exists
     }
-    public function getMidtermAttribute()
-{
-    return $this->attributes['midterm_grade'];
-}
+//     public function getMidtermAttribute()
+// {
+//     return $this->attributes['midterm_grade'];
+// }
 
-public function getFinalAttribute()
-{
-    return $this->attributes['final_grade'];
-}
+// public function getFinalAttribute()
+// {
+//     return $this->attributes['final_grade'];
+// }
 }

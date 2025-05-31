@@ -28,7 +28,6 @@ Artisan::command('reminder:instructor-grades', function () {
 });
 
 
-// Schedule the command monthly
 use Illuminate\Console\Scheduling\Schedule;
 
 app(Schedule::class)->command('reminder:instructor-grades')->everyMinute();

@@ -6,6 +6,8 @@ use App\Models\Student;
 use App\Models\Grade;
 use Illuminate\Http\Request;
 
+
+
 class StudentsController extends Controller
 {
     /**
@@ -34,10 +36,14 @@ class StudentsController extends Controller
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:students,email',
-            'role' => 'required|in:student',
-            'age' => 'required|integer',
+            'password' => 'required|string|min:6',
+            'age' => 'required|integer|min:1',
             'course' => 'required|string|max:255',
+            'role' => 'required|string|in:student',
         ]);
+
+        // Hash the password before saving
+        $validatedData['password'] = bcrypt($validatedData['password']);
 
         $student = Student::create($validatedData);
 
@@ -46,6 +52,7 @@ class StudentsController extends Controller
             'student' => $student
         ], 201);
     }
+
 
     /**
      * Display the specified resource.
@@ -79,7 +86,16 @@ class StudentsController extends Controller
             'role' => 'required|in:student',
             'age' => 'required|integer',
             'course' => 'required|string|max:255',
+            'password' => 'nullable|string|min:6', // password optional on update
         ]);
+
+        if (!empty($validatedData['password'])) {
+            // Hash the password if provided
+            $validatedData['password'] = bcrypt($validatedData['password']);
+        } else {
+            // Remove password if not provided to avoid overwriting with null
+            unset($validatedData['password']);
+        }
 
         $student->update($validatedData);
 
@@ -114,5 +130,33 @@ class StudentsController extends Controller
     
         return response()->json($grades);
     }
-    
+    // Show grades for a student
+public function showByStudent($id)
+{
+    $grades = Grade::where('student_id', $id)->get();
+    if ($grades->isEmpty()) {
+        return response()->json(['message' => 'Grades not found'], 404);
+    }
+    return response()->json($grades);
+}
+
+// Store or update grades for a student
+public function storeForStudent(Request $request, $id)
+{
+    $validated = $request->validate([
+        'midterm_grade' => 'required|numeric|min:0|max:100',
+        'final_grade' => 'required|numeric|min:0|max:100',
+    ]);
+
+    $grade = Grade::updateOrCreate(
+        ['student_id' => $id],
+        [
+            'midterm_grade' => $validated['midterm_grade'],
+            'final_grade' => $validated['final_grade'],
+        ]
+    );
+
+    return response()->json($grade, 201);
+}
+
 }

@@ -9,6 +9,11 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\CredentialMail;
 use Illuminate\Support\Facades\Hash;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Imports\Import;
+use App\Exports\Export;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+
 use Exception;
 
 class InstructorController extends Controller
@@ -155,5 +160,20 @@ class InstructorController extends Controller
                 'error' => $e->getMessage(),
             ], 500);
         }
+    }
+    
+    public function import(Request $request)
+{
+    $request->validate([
+        'file' => 'required|file|mimes:csv,xlsx,xls|max:2048',
+    ]);
+
+    Excel::import(new Import, $request->file('file'));
+
+    return response()->json(['message' => 'Students imported successfully.'], 200);
+}
+    
+    public function export(): BinaryFileResponse{
+        return Excel::download(new Export, 'instructors.xlsx');
     }
 }

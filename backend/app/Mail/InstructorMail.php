@@ -49,5 +49,7 @@ class InstructorMail extends Mailable
     {
         return [];
     }
+
+    
 }
 

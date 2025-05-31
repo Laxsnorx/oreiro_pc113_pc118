@@ -4,12 +4,17 @@ use App\Http\Controllers\LauthController;
 use App\Http\Controllers\GradeController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\InstructorController;
+use App\Http\Controllers\GradeImportExportController;
+use App\Http\Controllers\SmsController;
 
-Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/dashboard/admin', fn() => response()->json(['message' => 'Admin Dashboard']))->middleware('role:admin');
-    Route::get('/dashboard/teacher', fn() => response()->json(['message' => 'Teacher Dashboard']))->middleware('role:teacher');
-    Route::get('/dashboard/student', fn() => response()->json(['message' => 'Student Dashboard']))->middleware('role:student');
-});
+
+Route::post('/sms', [SmsController::class, 'sendSms']);
+
+// Route::middleware('auth:sanctum')->group(function () {
+//     Route::get('/dashboard/admin', fn() => response()->json(['message' => 'Admin Dashboard']))->middleware('role:admin');
+//     Route::get('/dashboard/teacher', fn() => response()->json(['message' => 'Teacher Dashboard']))->middleware('role:teacher');
+//     Route::get('/dashboard/student', fn() => response()->json(['message' => 'Student Dashboard']))->middleware('role:student');
+// });
 
 //* Grades
 Route::get('/grades', [GradeController::class, 'index']);
@@ -18,6 +23,9 @@ Route::get('/grades/{id}', [GradeController::class, 'show']);
 Route::put('/grades/{id}', [GradeController::class, 'update']);
 Route::delete('/grades/{id}', [GradeController::class, 'destroy']);
 
+//*Grade Import/Export
+Route::get('/grade/export', [GradeImportExportController::class, 'export']);
+Route::post('/grades/import', [GradeImportExportController::class, 'import']);
 //* Subjects
 Route::get('/subjects', [SubjectController::class, 'index']);
 Route::post('/subjects', [SubjectController::class, 'store']);
@@ -31,6 +39,8 @@ Route::post('/instructors', [InstructorController::class, 'store']);
 Route::get('/instructors/{id}', [InstructorController::class, 'show']);
 Route::post('/instructors/{id}', [InstructorController::class, 'update']);
 Route::delete('/instructors/{id}', [InstructorController::class, 'destroy']);
+
+
 
 
 //////////////////////////////////////////////////////!
@@ -101,8 +111,10 @@ Route::middleware('auth:sanctum')->post('/logout', function (Request $request) {
         Route::get('/students/{id}', [StudentsController::class,'show']);
         Route::delete('/students/{id}', [StudentsController::class, 'destroy']);
         Route::get('/students/{id}/grades', [GradeController::class, 'getGradesByStudent']);
-
-        
+        // Get all grades for a student
+        Route::get('/students/{id}/grades', [StudentsController::class, 'showByStudent']);
+        Route::put('/students/{id}/grades', [StudentsController::class, 'storeForStudent']);
+                    
 
 
         Route::post('/employees', [EmployeeController::class,'store']);
