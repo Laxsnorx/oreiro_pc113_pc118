@@ -168,7 +168,10 @@
         <th>ID</th>
         <th>Full Name</th>
         <th>Email</th>
+        <th>Password</th>
+        <th>Age</th>
         <th>Course</th>
+        <th>Role</th>
         <th>Actions</th>
       </tr>
     </thead>
@@ -207,7 +210,7 @@
     function fetchStudents() {
       const token = localStorage.getItem("token");
 
-      fetch("https://rgradebackend.bdedal.online/api/students", {
+      fetch("http://127.0.0.1:8000/api/students", {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -224,30 +227,37 @@
     }
 
     function displayStudents() {
-      const tbody = document.querySelector("#studentsTable tbody");
-      tbody.innerHTML = "";
+  const tbody = document.querySelector("#studentsTable tbody");
+  tbody.innerHTML = "";
 
-      const startIndex = (currentPage - 1) * rowsPerPage;
-      const paginatedStudents = filteredStudents.slice(startIndex, startIndex + rowsPerPage);
+  const startIndex = (currentPage - 1) * rowsPerPage;
+  const paginatedStudents = filteredStudents.slice(startIndex, startIndex + rowsPerPage);
 
-      paginatedStudents.forEach(student => {
-        const row = document.createElement("tr");
-        row.innerHTML = `
-          <td>${student.id}</td>
-          <td>${student.name}</td>
-          <td>${student.email}</td>
-          <td>${student.course}</td>
-          <td>
-            <button onclick="viewGrades(${student.id})" style="background-color: yellow; border: none; color: black; padding: 10px 10px; cursor: pointer;">View</button>
-            <button onclick="editStudent(${student.id})">Edit</button>
-            <button class="btn-delete" onclick="deleteStudent(${student.id})">Delete</button>
-          </td>
-        `;
-        tbody.appendChild(row);
-      });
+  paginatedStudents.forEach(student => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${student.id}</td>
+      <td>${student.name}</td>
+      <td>${student.email}</td>
+      <td>${student.password || '••••••'}</td>  <!-- Show masked or real password -->
+      <td>${student.age || ''}</td>
+      <td>${student.course}</td>
+      <td>${student.role || ''}</td>
+      <td>
+          <div style="display: flex; gap: 6px;">
+    <button onclick="viewGrades(${student.id})" style="background-color: yellow; border: none; color: black; padding: 10px 10px; cursor: pointer;">View</button>
+    <button onclick="editStudent(${student.id})">Edit</button>
+    <button class="btn-delete" onclick="deleteStudent(${student.id})">Delete</button>
+        </div>
+        </td>
 
-      renderPaginationControls();
-    }
+    `;
+    tbody.appendChild(row);
+  });
+
+  renderPaginationControls();
+}
+
 
     function renderPaginationControls() {
       const totalPages = Math.ceil(filteredStudents.length / rowsPerPage);
@@ -276,27 +286,31 @@
       <input type="number" id="age" class="swal2-input" placeholder="Age">
       <input type="email" id="email" class="swal2-input" placeholder="Email">
       <input type="text" id="course" class="swal2-input" placeholder="Course">
+      <input type="password" id="password" class="swal2-input" placeholder="Password">
     `,
-    confirmButtonText: 'Create',
-    showCancelButton: true,
     preConfirm: () => {
       const name = document.getElementById('name').value.trim();
       const age = parseInt(document.getElementById('age').value.trim());
       const email = document.getElementById('email').value.trim();
       const course = document.getElementById('course').value.trim();
+      const password = document.getElementById('password').value;
 
-      if (!name || isNaN(age) || !email || !course) {
-        Swal.showValidationMessage('All fields are required');
+      if (!name || isNaN(age) || !email || !course || !password) {
+        Swal.showValidationMessage('All fields including password are required');
         return false;
       }
 
-      return { name, age, email, course };
+      return { name, age, email, course, password, role: 'student' };
     }
   }).then(result => {
     if (result.isConfirmed) {
       const token = localStorage.getItem('token');
+      if (!token) {
+        Swal.fire('Error', 'User not authenticated', 'error');
+        return;
+      }
 
-      fetch("https://rgradebackend.bdedal.online/api/students", {
+      fetch("http://127.0.0.1:8000/api/students", {
         method: "POST",
         headers: {
           'Content-Type': 'application/json',
@@ -304,15 +318,24 @@
         },
         body: JSON.stringify(result.value)
       })
-      .then(res => res.json())
-      .then(data => {
+      .then(async res => {
+        if (!res.ok) {
+          const errorMsg = await res.text();
+          throw new Error(errorMsg || 'Failed to create student');
+        }
+        return res.json();
+      })
+      .then(() => {
         Swal.fire('Success', 'Student created successfully', 'success');
         fetchStudents();
       })
-      .catch(() => Swal.fire('Error', 'Failed to create student', 'error'));
+      .catch(err => {
+        Swal.fire('Error', err.message || 'Failed to create student', 'error');
+      });
     }
   });
 }
+
 
 
 function editStudent(id) {
@@ -331,28 +354,27 @@ function editStudent(id) {
       <input id="swal-input2" class="swal2-input" placeholder="Age" type="number" value="${student.age || ''}">
       <input id="swal-input3" class="swal2-input" placeholder="Email" value="${student.email}">
       <input id="swal-input4" class="swal2-input" placeholder="Course" value="${student.course}">
+      <input id="swal-input5" class="swal2-input" placeholder="Password" type="password" value="${student.password || ''}">
     `,
-    focusConfirm: false,
-    showCancelButton: true,
-    confirmButtonText: 'Update',
     preConfirm: () => {
       const name = document.getElementById('swal-input1').value.trim();
       const age = parseInt(document.getElementById('swal-input2').value.trim());
       const email = document.getElementById('swal-input3').value.trim();
       const course = document.getElementById('swal-input4').value.trim();
+      const password = document.getElementById('swal-input5').value;
 
-      if (!name || isNaN(age) || !email || !course) {
+      if (!name || isNaN(age) || !email || !course || !password) {
         Swal.showValidationMessage('All fields are required');
         return false;
       }
 
-      return { name, age, email, course };
+      return { name, age, email, course, password, role: 'student' };
     }
   }).then((result) => {
     if (result.isConfirmed) {
       const updatedData = result.value;
 
-      fetch(`https://rgradebackend.bdedal.online/api/students/${id}`, {
+      fetch(`http://127.0.0.1:8000/api/students/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -388,7 +410,7 @@ function editStudent(id) {
         confirmButtonText: "Yes, delete it!"
       }).then(result => {
         if (result.isConfirmed) {
-          fetch(`https://rgradebackend.bdedal.online/api/students/${id}`, {
+          fetch(`http://127.0.0.1:8000/api/students/${id}`, {
             method: "DELETE",
             headers: {
               Authorization: `Bearer ${token}`

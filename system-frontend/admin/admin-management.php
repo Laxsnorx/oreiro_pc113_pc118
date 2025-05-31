@@ -176,7 +176,7 @@ document.addEventListener("DOMContentLoaded", function () {
 function loadUsers() {
   const token = localStorage.getItem("token");
 
-  fetch("https://rgradebackend.bdedal.online/api/user", {
+  fetch("http://127.0.0.1:8000/api/user", {
     headers: {
       Authorization: `Bearer ${token}`
     }
@@ -196,10 +196,10 @@ function loadUsers() {
         <td>${user.role || 'N/A'}</td>
         <td>${user.password || '********'}</td>
         <td>
-          ${user.image ? `<img src="https://rgradebackend.bdedal.online/storage/${user.image}" width="50" height="50">` : 'No Image'}
+          ${user.image ? `<img src="http://127.0.0.1:8000/storage/${user.image}" width="50" height="50">` : 'No Image'}
         </td>
         <td>
-          ${user.file ? `<a href="https://rgradebackend.bdedal.online/storage/${user.file}" target="_blank">Download</a>` : 'No File'}
+          ${user.file ? `<a href="http://127.0.0.1:8000/storage/${user.file}" target="_blank">Download</a>` : 'No File'}
         </td>
         <td>
   <div style="display: flex; gap: 5px;">
@@ -247,7 +247,7 @@ function createUser() {
     if (result.isConfirmed) {
       const token = localStorage.getItem("token");
 
-      fetch("https://rgradebackend.bdedal.online/api/user", {
+      fetch("http://127.0.0.1:8000/api/user", {
         method: "POST",
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -271,7 +271,7 @@ function createUser() {
 function editUser(id) {
   const token = localStorage.getItem("token");
 
-  fetch(`https://rgradebackend.bdedal.online/api/user/${id}`, {
+  fetch(`http://127.0.0.1:8000/api/user/${id}`, {
     headers: {
       Authorization: `Bearer ${token}`
     }
@@ -304,7 +304,7 @@ function editUser(id) {
       if (result.isConfirmed) {
         const updatedData = result.value;
 
-        fetch(`https://rgradebackend.bdedal.online/api/user/${id}`, {
+        fetch(`http://127.0.0.1:8000/api/user/${id}`, {
           method: 'PUT',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -344,7 +344,7 @@ function deleteUser(id) {
     confirmButtonText: "Yes, delete it!"
   }).then(result => {
     if (result.isConfirmed) {
-      fetch(`https://rgradebackend.bdedal.online/api/user/${id}`, {
+      fetch(`http://127.0.0.1:8000/api/user/${id}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`

@@ -4,6 +4,10 @@
   <meta charset="UTF-8">
   <title>Student List</title>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrious/dist/qrious.min.js"></script>
+
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+
   <style>
     body {
     background: #eaeef6;
@@ -157,13 +161,18 @@
   <?php include 'sidebar.php'; ?>
   <h1>Student List</h1>
 
-  <div class="action-button-container">
-    <button onclick="createStudent()">Add Student</button>
-  </div>
+
 <div style="margin-left: 290px; padding: 0 20px 10px 0; display: flex; justify-content: space-between; align-items: center;">
   <input type="text" id="searchInput" class="swal2-input" style="max-width: 300px;" placeholder="Search student by name or email" oninput="filterStudents()">
 </div>
-
+<div style="margin-left: 290px; padding: 10px 20px 20px 0; display: flex; gap: 10px;">
+  <button onclick="exportExcel()">Export Excel</button>
+  <button onclick="triggerImport()">Import Excel</button>
+  <input type="file" id="excelFileInput" accept=".xlsx,.xls" style="display:none" onchange="handleFileImport(event)">
+</div>
+<div class="action-button-container" style="margin-left: 290px;">
+  <button onclick="openAddGradeModal()">Add Grade</button>
+</div>
   <table id="studentsTable">
     <thead>
       <tr>
@@ -172,6 +181,7 @@
         <th>Email</th>
         <th>Course</th>
         <th>Actions</th>
+        <th>QR</th>
       </tr>
     </thead>
     <tbody>
@@ -212,7 +222,7 @@ document.addEventListener("DOMContentLoaded", function () {
 function fetchStudents() {
   const token = localStorage.getItem("token");
 
-  fetch("https://rgradebackend.bdedal.online/api/students", {
+  fetch("http://127.0.0.1:8000/api/students", {
     headers: {
       Authorization: `Bearer ${token}`
     }
@@ -238,16 +248,21 @@ function displayStudents() {
   paginatedStudents.forEach(student => {
     const row = document.createElement("tr");
     row.innerHTML = `
-      <td>${student.id}</td>
-      <td>${student.name}</td>
-      <td>${student.email}</td>
-      <td>${student.course}</td>
-      <td>
-        <button onclick="viewGrades(${student.id})" style="background-color: yellow; border: none; color: black; padding: 10px 10px; cursor: pointer;">View</button>
-        <button onclick="editStudent(${student.id})">Edit</button>
-        <button class="btn-delete" onclick="deleteStudent(${student.id})">Delete</button>
-      </td>
-    `;
+  <td>${student.id}</td>
+  <td>${student.name}</td>
+  <td>${student.email}</td>
+  <td>${student.course}</td>
+  <td>
+    <button onclick="viewGrades(${student.id})" style="background-color: yellow; border: none; color: black; padding: 10px 10px; cursor: pointer;">View</button>
+    <button onclick="editStudent(${student.id})">Edit</button>
+    <button class="btn-delete" onclick="deleteStudent(${student.id})">Delete</button>
+  </td>
+  <td>
+    <button onclick="viewQR(${student.id})" style="background-color: lightgreen; border: none; color: black; padding: 10px 10px; cursor: pointer;">View QR</button>
+
+  </td>
+`;
+
     tbody.appendChild(row);
   });
 
@@ -273,17 +288,123 @@ function renderPaginationControls() {
   }
 }
 
+async function fetchStudentDetails(studentId, token) {
+  try {
+    // Fetch grades, subjects, and instructors in parallel
+    const [gradesRes, subjectsRes, instructorsRes, studentRes] = await Promise.all([
+      fetch(`http://127.0.0.1:8000/api/students/${studentId}/grades`, {
+        headers: { Authorization: `Bearer ${token}` }
+      }),
+      fetch('http://127.0.0.1:8000/api/subjects', {
+        headers: { Authorization: `Bearer ${token}` }
+      }),
+      fetch('http://127.0.0.1:8000/api/instructors', {
+        headers: { Authorization: `Bearer ${token}` }
+      }),
+      fetch(`http://127.0.0.1:8000/api/students/${studentId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      }),
+    ]);
+
+    if (!gradesRes.ok || !subjectsRes.ok || !instructorsRes.ok || !studentRes.ok) {
+      throw new Error('Failed to fetch all required data');
+    }
+
+    const grades = await gradesRes.json();
+    const subjects = await subjectsRes.json();
+    const instructors = await instructorsRes.json();
+    const student = await studentRes.json();
+
+    return { student, grades, subjects, instructors };
+  } catch (error) {
+    console.error('Error fetching student details:', error);
+    throw error;
+  }
+}
+function buildQRContent({ student, grades = [], subjects = [], instructors = [] }) {
+  const baseInfo = `Name: ${student.name}
+Email: ${student.email}
+Course: ${student.course}`;
+
+  const subjectsMap = {};
+  subjects.forEach(subject => {
+    subjectsMap[subject.id] = subject;
+  });
+
+  const instructorsMap = {};
+  instructors.forEach(instructor => {
+    instructorsMap[instructor.id] = instructor.name;
+  });
+
+  const gradesInfo = grades.map((grade) => {
+    const subject = subjectsMap[grade.subject_id] || {};
+    const instructorName = instructorsMap[subject.instructor_id] || 'N/A';
+    const subjectName = subject.description || 'N/A';
+    const finalGrade = grade.final_grade !== null ? grade.final_grade : 'No Grade';
+
+    return `\n\nSubject: ${subjectName}
+Instructor: ${instructorName}
+Grade: ${finalGrade}`;
+  }).join('');
+
+  return `${baseInfo}${gradesInfo}`;
+}
+
+
+
+
+
+async function viewQR(studentId) {
+  const token = localStorage.getItem("token");
+
+  try {
+    const { student, grades, subjects, instructors } = await fetchStudentDetails(studentId, token);
+    const qrContent = buildQRContent({ student, grades, subjects, instructors });
+
+    const qr = new QRious({
+      value: qrContent,
+      size: 500,
+      background: '#ffffff',
+      foreground: '#000000',
+      level: 'L',
+    });
+
+    Swal.fire({
+      title: `<span style="font-size: 20px;">${student.name}</span>`,
+      html: `
+        <div style="text-align: center;">
+          <img src="${qr.toDataURL()}" 
+               alt="QR Code"
+               style="border: 8px solid #406ff3; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); margin-bottom: 10px; width: 300px; height: 300px;">
+        </div>
+      `,
+      showCloseButton: true,
+      showConfirmButton: false,
+      width: 400,
+      customClass: {
+        popup: 'custom-swal-popup'
+      }
+    });
+
+  } catch (error) {
+    console.error('QR Fetch Error:', error);
+    Swal.fire("Error", "Failed to load QR code details.", "error");
+  }
+}
+
+
+
 function viewGrades(studentId) { 
   const token = localStorage.getItem("token");
 
-  fetch(`https://rgradebackend.bdedal.online/api/students/${studentId}`, {
+  fetch(`http://127.0.0.1:8000/api/students/${studentId}`, {
     headers: {
       Authorization: `Bearer ${token}`
     }
   })
   .then(res => res.json())
   .then(student => {
-    fetch(`https://rgradebackend.bdedal.online/api/students/${studentId}/grades`, {
+    fetch(`http://127.0.0.1:8000/api/students/${studentId}/grades`, {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -354,16 +475,94 @@ function viewGrades(studentId) {
       Swal.fire({
         title: `<span style="font-size: 20px;">${student.name}'s Grades</span>`,
         html: gradesHtml,
+        showCloseButton: true,
         showConfirmButton: false
+        
       });
     });
   });
 }
+function editStudent(studentId) {
+  const token = localStorage.getItem("token");
+
+  fetch(`http://127.0.0.1:8000/api/students/${studentId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  })
+  .then(res => {
+    if (!res.ok) throw new Error('Failed to fetch student');
+    return res.json();
+  })
+  .then(student => {
+    Swal.fire({
+      title: 'Edit Student',
+      html: `
+        <input id="name" class="swal2-input" placeholder="Full Name" value="${student.name}">
+        <input id="email" class="swal2-input" placeholder="Email" value="${student.email}">
+        <input id="course" class="swal2-input" placeholder="Course" value="${student.course}">
+        <input id="age" class="swal2-input" placeholder="Age" type="number" value="${student.age}">
+      `,
+      showCancelButton: true,
+      confirmButtonText: 'Save',
+      preConfirm: () => {
+        const name = document.getElementById('name').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const course = document.getElementById('course').value.trim();
+        const age = parseInt(document.getElementById('age').value.trim());
+
+        if (!name || !email || !course || isNaN(age)) {
+          Swal.showValidationMessage("All fields are required and age must be a number");
+          return false;
+        }
+
+        return { name, email, course, age };
+      }
+    }).then((result) => {
+      if (!result.isConfirmed) return;
+
+      const { name, email, course, age } = result.value;
+
+      fetch(`http://127.0.0.1:8000/api/students/${studentId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          course,
+          age,
+          role: "student" // required by backend validation
+        })
+      })
+      .then(response => {
+        if (!response.ok) return response.json().then(err => { throw err });
+        return response.json();
+      })
+      .then(() => {
+        Swal.fire('Success', 'Student updated successfully!', 'success');
+        fetchStudents(); // reload list
+      })
+      .catch(error => {
+        console.error('Update failed:', error);
+        const message = error?.message || 'Failed to update student.';
+        Swal.fire('Error', message, 'error');
+      });
+    });
+  })
+  .catch(error => {
+    console.error('Fetch failed:', error);
+    Swal.fire('Error', 'Could not load student data.', 'error');
+  });
+}
+
 
 function editGrades(studentId) {
   const token = localStorage.getItem("token");
 
-  fetch(`https://rgradebackend.bdedal.online/api/students/${studentId}/grades`, {
+  fetch(`http://127.0.0.1:8000/api/students/${studentId}/grades`, {
     headers: {
       Authorization: `Bearer ${token}`
     }
@@ -436,7 +635,7 @@ function editGrades(studentId) {
       }).then(result => {
         if (result.isConfirmed) {
           const updateRequests = Object.entries(result.value).map(([id, updated]) => {
-            return fetch(`https://rgradebackend.bdedal.online/api/grades/${id}`, {
+            return fetch(`http://127.0.0.1:8000/api/grades/${id}`, {
               method: "PUT",
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -472,12 +671,13 @@ function deleteStudent(id) {
         confirmButtonText: "Yes, delete it!"
       }).then(result => {
         if (result.isConfirmed) {
-          fetch(`https://rgradebackend.bdedal.online/api/students/${id}`, {
-            method: "DELETE",
-            headers: {
-              Authorization: `Bearer ${token}`
-            }
-          })
+          fetch('http://127.0.0.1:8000/api/grades/export', {
+  method: 'GET',
+  headers: {
+    'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+  }
+})
+
             .then(res => res.json())
             .then(() => {
               Swal.fire("Deleted!", "Student has been deleted.", "success");
@@ -488,7 +688,225 @@ function deleteStudent(id) {
       });
     } 
 
+    function exportExcel() {
+  Swal.fire({
+    title: 'Exporting...',
+    text: 'Your file will download shortly.',
+    icon: 'info',
+    timer: 1500,
+    showConfirmButton: false
+  }).then(() => {
+    window.open('student-export.php', '_blank');
+  });
+}
+
+function triggerImport() {
+  document.getElementById("excelFileInput").click();
+}
+
+function handleFileImport(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const formData = new FormData();
+  formData.append("file", file);
+
+  // Get CSRF token from meta tag
+  const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+  Swal.fire({
+    title: 'Uploading...',
+    text: 'Please wait while the file is being uploaded.',
+    allowOutsideClick: false,
+    didOpen: () => {
+      Swal.showLoading();
+    }
+  });
+
+  fetch("http://127.0.0.1:8000/api/grades/import", {
+  method: "POST",
+  body: formData,
+})
+  .then(response => {
+    if (!response.ok) throw new Error("Import failed");
+    return response.json();
+  })
+  .then(data => {
+    Swal.fire({
+      title: 'Success!',
+      text: data.message || 'Import successful',
+      icon: 'success'
+    });
+    // Optionally refresh data here, e.g. fetchStudents();
+  })
+  .catch(error => {
+    console.error("Import error:", error);
+    Swal.fire({
+      title: 'Error!',
+      text: 'Import failed. Check console for details.',
+      icon: 'error'
+    });
+  });
+  
+}
+async function openAddGradeModal() {
+  const token = localStorage.getItem("token");
+
+  try {
+    // Fetch all students
+    const studentsRes = await fetch("http://127.0.0.1:8000/api/students", {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    if (!studentsRes.ok) {
+      throw new Error(`Failed to fetch students: ${studentsRes.status} ${studentsRes.statusText}`);
+    }
+
+    const students = await studentsRes.json();
+
+    // For each student, fetch their grades
+    const studentsWithGrades = await Promise.all(students.map(async (student) => {
+      try {
+        const gradesRes = await fetch(`http://127.0.0.1:8000/api/students/${student.id}/grades`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        if (!gradesRes.ok) {
+          if (gradesRes.status === 404) {
+            const errorData = await gradesRes.json();
+            if (errorData.message && errorData.message.toLowerCase() === 'grades not found') {
+              // No grades yet - treat as incomplete grades so we can add grades
+              return {
+                ...student,
+                hasIncompleteGrades: true
+              };
+            } else {
+              console.error(`Unexpected error fetching grades for student ${student.id}:`, errorData);
+              return {
+                ...student,
+                hasIncompleteGrades: true
+              };
+            }
+          }
+          // Other errors
+          console.error(`Failed to fetch grades for student ${student.id}: ${gradesRes.status}`);
+          return {
+            ...student,
+            hasIncompleteGrades: true
+          };
+        }
+
+        const grades = await gradesRes.json();
+
+        if (!Array.isArray(grades)) {
+          console.warn(`Grades response is not an array for student ${student.id}`, grades);
+          return {
+            ...student,
+            hasIncompleteGrades: true
+          };
+        }
+
+        const incompleteGrades = grades.some(grade =>
+          grade.midterm_grade === null || grade.final_grade === null
+        );
+
+        return {
+          ...student,
+          hasIncompleteGrades: incompleteGrades || grades.length === 0
+        };
+      } catch (err) {
+        console.error(`Error fetching grades for student ${student.id}`, err);
+        return {
+          ...student,
+          hasIncompleteGrades: true
+        };
+      }
+    }));
+
+    // Filter students needing grades
+    const studentsToAddGrades = studentsWithGrades.filter(s => s.hasIncompleteGrades);
+
+    if (studentsToAddGrades.length === 0) {
+      Swal.fire('Info', 'No students need grades added — all have complete grades.', 'info');
+      return;
+    }
+
+    // Build dropdown
+    let studentOptionsHtml = `<select id="studentSelect" class="swal2-input"><option value="">Select a student</option>`;
+    studentsToAddGrades.forEach(s => {
+      studentOptionsHtml += `<option value="${s.id}">${s.name} (${s.email})</option>`;
+    });
+    studentOptionsHtml += `</select>`;
+
+    Swal.fire({
+      title: 'Add Grades for Student',
+      html: `
+        ${studentOptionsHtml}
+        <input id="midtermGrade" class="swal2-input" placeholder="Midterm Grade (0-100)" type="number" min="0" max="100">
+        <input id="finalGrade" class="swal2-input" placeholder="Final Grade (0-100)" type="number" min="0" max="100">
+      `,
+      showCancelButton: true,
+      confirmButtonText: 'Save Grades',
+      preConfirm: () => {
+        const studentId = document.getElementById('studentSelect').value;
+        const midtermGrade = document.getElementById('midtermGrade').value.trim();
+        const finalGrade = document.getElementById('finalGrade').value.trim();
+
+        if (!studentId) {
+          Swal.showValidationMessage('Please select a student');
+          return false;
+        }
+        if (midtermGrade === '' || isNaN(midtermGrade) || midtermGrade < 0 || midtermGrade > 100) {
+          Swal.showValidationMessage('Please enter a valid midterm grade between 0 and 100');
+          return false;
+        }
+        if (finalGrade === '' || isNaN(finalGrade) || finalGrade < 0 || finalGrade > 100) {
+          Swal.showValidationMessage('Please enter a valid final grade between 0 and 100');
+          return false;
+        }
+
+        return {
+          studentId,
+          midtermGrade: parseFloat(midtermGrade),
+          finalGrade: parseFloat(finalGrade)
+        };
+      }
+    }).then(async (result) => {
+      if (!result.isConfirmed) return;
+
+      const { studentId, midtermGrade, finalGrade } = result.value;
+
+      try {
+        const response = await fetch(`http://127.0.0.1:8000/api/students/${studentId}/grades`, {
+          method: 'PUT', // Changed from POST to PUT here
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            midterm_grade: midtermGrade,
+            final_grade: finalGrade
+          })
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Failed to save grades');
+        }
+
+        Swal.fire('Success', 'Grades added successfully!', 'success');
+        fetchStudents(); // Refresh list
+
+      } catch (err) {
+        Swal.fire('Error', err.message, 'error');
+      }
+    });
+
+  } catch (error) {
+    console.error(error);
+    Swal.fire('Error', 'Failed to load students or grades.', 'error');
+  }
+}
 
 </script>
-</body>
 </html>

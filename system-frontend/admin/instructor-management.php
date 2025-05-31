@@ -60,31 +60,34 @@
 
   /* Button styling */
   button {
-    background-color: #4A90E2;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 8px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  }
+  background-color: #4A90E2;
+  color: white;
+  border: none;
+  padding: 14px 28px;        /* Increased padding for bigger buttons */
+  border-radius: 8px;
+  font-size: 18px;           /* Bigger font size */
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
 
-  button:hover {
-    background-color: #357ABD;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-  }
+button:hover {
+  background-color: #357ABD;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
 
-  .btn-delete {
-    background-color: #e74c3c;
-    margin-left: 5px;
-  }
+.btn-delete {
+  background-color: #e74c3c;
+  margin-left: 5px;
+  padding: 14px 28px;       /* Also bigger padding for delete button */
+  font-size: 18px;          /* Bigger font size */
+}
 
-  .btn-delete:hover {
-    background-color: #c0392b;
-  }
+.btn-delete:hover {
+  background-color: #c0392b;
+}
+
 
   /* Form container styles */
   .swal2-input {
@@ -195,10 +198,10 @@
 
     function fetchInstructors() {
   Promise.all([
-    fetch("https://rgradebackend.bdedal.online/api/instructors", {
+    fetch("http://127.0.0.1:8000/api/instructors", {
       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
     }).then(res => res.json()),
-    fetch("https://rgradebackend.bdedal.online/api/subjects", {
+    fetch("http://127.0.0.1:8000/api/subjects", {
       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
     }).then(res => res.json())
   ])
@@ -237,7 +240,7 @@ function displayInstructors() {
     const row = document.createElement("tr");
     row.innerHTML = `
       <td>${ins.id}</td>
-      <td>${ins.image ? `<img src="https://rgradebackend.bdedal.online/storage/${ins.image}" width="50" style="border-radius: 8px;">` : 'N/A'}</td>
+      <td>${ins.image ? `<img src="http://127.0.0.1:8000/storage/${ins.image}" width="50" style="border-radius: 8px;">` : 'N/A'}</td>
       <td>${ins.name}</td>
       <td>${ins.email || 'N/A'}</td>
       <td>${ins.age}</td>
@@ -274,10 +277,10 @@ function displayInstructors() {
 
     function fetchInstructors() {
   Promise.all([
-    fetch("https://rgradebackend.bdedal.online/api/instructors", {
+    fetch("http://127.0.0.1:8000/api/instructors", {
       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
     }).then(res => res.json()),
-    fetch("https://rgradebackend.bdedal.online/api/subjects", {
+    fetch("http://127.0.0.1:8000/api/subjects", {
       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
     }).then(res => res.json())
   ])
@@ -297,6 +300,7 @@ function displayInstructors() {
   // Subjects not assigned or assigned to current instructor
   return allSubjects.filter(s => !s.instructor_id || s.instructor_id === currentSubjectId);
 }
+
 
 function createInstructor() { 
   const availableSubjects = getAvailableSubjects();
@@ -397,8 +401,6 @@ function createInstructor() {
 }
 
 
-
-
 function editInstructor(id) {
   const instructor = allInstructors.find(ins => ins.id === id);
   if (!instructor) {
@@ -467,7 +469,7 @@ function editInstructor(id) {
     }
   }).then(result => {
     if (result.isConfirmed) {
-      fetch(`https://rgradebackend.bdedal.online/api/instructors/${id}`, {
+      fetch(`http://127.0.0.1:8000/api/instructors/${id}`, {
         method: "POST", // or PUT, depending on your API
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`
@@ -503,7 +505,7 @@ function editInstructor(id) {
         cancelButtonText: 'Cancel'
       }).then(result => {
         if (result.isConfirmed) {
-          fetch(`https://rgradebackend.bdedal.online/api/instructors/${id}`, {
+          fetch(`http://127.0.0.1:8000/api/instructors/${id}`, {
             method: "DELETE",
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`
@@ -526,7 +528,7 @@ function editInstructor(id) {
   Swal.fire({
     title: `<span style="font-size: 1.3rem; font-weight: 600; color: #333;">${ins.name}</span>`,
     html: `
-      ${ins.image ? `<img src="https://rgradebackend.bdedal.online/storage/${ins.image}" 
+      ${ins.image ? `<img src="http://127.0.0.1:8000/storage/${ins.image}" 
         style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; margin-bottom: 15px; border: 2px solid #406ff3;">` : ''}
       <div style="text-align: left; font-size: 1rem; color: #555; line-height: 1.5;">
         <p><strong style="color: #406ff3;">Email:</strong> ${ins.email || 'N/A'}</p>

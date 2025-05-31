@@ -154,14 +154,13 @@
   <?php include 'sidebar.php'; ?>
   <h1>Student List</h1>
 
-  <div class="action-button-container">
-    <button onclick="createStudent()">Add Student</button>
-  </div>
+
 
   <div style="margin-left: 290px; padding: 0 20px 10px 0; display: flex; justify-content: space-between; align-items: center;">
     <input type="text" id="searchInput" class="swal2-input" style="max-width: 300px;" placeholder="Search student by name or email" oninput="filterStudents()">
   </div>
 
+  
   <table id="studentsTable">
     <thead>
       <tr>
@@ -207,7 +206,7 @@
     function fetchStudents() {
       const token = localStorage.getItem("token");
 
-      fetch("https://rgradebackend.bdedal.online/api/students", {
+      fetch("http://127.0.0.1:8000/api/students", {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -296,7 +295,7 @@
     if (result.isConfirmed) {
       const token = localStorage.getItem('token');
 
-      fetch("https://rgradebackend.bdedal.online/api/students", {
+      fetch("http://127.0.0.1:8000/api/students", {
         method: "POST",
         headers: {
           'Content-Type': 'application/json',
@@ -352,7 +351,7 @@ function editStudent(id) {
     if (result.isConfirmed) {
       const updatedData = result.value;
 
-      fetch(`https://rgradebackend.bdedal.online/api/students/${id}`, {
+      fetch(`http://127.0.0.1:8000/api/students/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -388,7 +387,7 @@ function editStudent(id) {
         confirmButtonText: "Yes, delete it!"
       }).then(result => {
         if (result.isConfirmed) {
-          fetch(`https://rgradebackend.bdedal.online/api/students/${id}`, {
+          fetch(`http://127.0.0.1:8000/api/students/${id}`, {
             method: "DELETE",
             headers: {
               Authorization: `Bearer ${token}`
