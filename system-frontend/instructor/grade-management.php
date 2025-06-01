@@ -350,30 +350,28 @@ Grade: ${finalGrade}`;
   return `${baseInfo}${gradesInfo}`;
 }
 
-
-
-
-
 async function viewQR(studentId) {
   const token = localStorage.getItem("token");
 
   try {
-    const { student, grades, subjects, instructors } = await fetchStudentDetails(studentId, token);
-    const qrContent = buildQRContent({ student, grades, subjects, instructors });
-
-    const qr = new QRious({
-      value: qrContent,
-      size: 500,
-      background: '#ffffff',
-      foreground: '#000000',
-      level: 'L',
+    const response = await fetch(`http://localhost:8000/api/grades/student/${studentId}`, {
+      headers: {
+        "Authorization": `Bearer ${token}`
+      }
     });
 
+    if (!response.ok) {
+      throw new Error("Failed to fetch student data");
+    }
+
+    const { student, qr_code } = await response.json();
+
+    // Just display the QR code image returned from backend
     Swal.fire({
       title: `<span style="font-size: 20px;">${student.name}</span>`,
       html: `
         <div style="text-align: center;">
-          <img src="${qr.toDataURL()}" 
+          <img src="${qr_code}" 
                alt="QR Code"
                style="border: 8px solid #406ff3; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); margin-bottom: 10px; width: 300px; height: 300px;">
         </div>
@@ -391,6 +389,8 @@ async function viewQR(studentId) {
     Swal.fire("Error", "Failed to load QR code details.", "error");
   }
 }
+
+
 
 
 
