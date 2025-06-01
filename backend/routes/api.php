@@ -114,7 +114,8 @@ Route::middleware('auth:sanctum')->post('/logout', function (Request $request) {
         // Get all grades for a student
         Route::get('/students/{id}/grades', [StudentsController::class, 'showByStudent']);
         Route::put('/students/{id}/grades', [StudentsController::class, 'storeForStudent']);
-                    
+        Route::get('/grades/student/{id}', [GradeController::class, 'getGradesStudent']);
+
 
 
         Route::post('/employees', [EmployeeController::class,'store']);
